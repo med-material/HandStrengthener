@@ -15,9 +15,8 @@ In the long-term the hand strengthener will connect to BCI and EMG equipment, to
 Done at Aalborg University.   
 - **Bastian ILSO** - _Developer_ - [MED Material](https://github.com/med-material)
 
- -----------------  
-# Technical details
-# Logged Data
+## Technical details
+### Logged Data
 Data is currently logged locally into a ´keysequencedata´ csv file.
  * **Date**: date you started the application (e.g. 01/29/19)
  * **Timestamp**: time you started the application (e.g. 03:01:17.1234)
