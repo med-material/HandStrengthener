@@ -1,4 +1,5 @@
 # Hand Strengther
+![Hand Strengthener Interface](https://raw.githubusercontent.com/med-material/HandStrengthener/master/hand-strengthener.png)
 
 ## About
 The hand strengthener is an application for rehabilitation of hand opening and closening in stroke patients. The hand-strengthener features the following:
