@@ -20,8 +20,8 @@ public class OrangeBehavior : MonoBehaviour
     }
 
     public void ActivateSuccessFeedback() {
-        //StartCoroutine("Squeeze");
-        anim.Play("Squeezed");
+        StartCoroutine("Squeeze");
+        
         //anim.Play("ballSqueeze");
 
     }
@@ -29,9 +29,10 @@ public class OrangeBehavior : MonoBehaviour
     // TODO: Present a stimuli
 
     IEnumerator Squeeze() {
-        transform.localScale = new Vector3(0.5f,1f,1f);
-        yield return new WaitForSeconds(0.5f);
-        Reset();
+        //transform.localScale = new Vector3(0.5f,1f,1f);
+        yield return new WaitForSeconds(0.02f);
+        anim.Play("Squeezed");
+        //Reset();
     }
 
     public void Reset() {
