@@ -77,6 +77,10 @@ public class KeySquenceInput : MonoBehaviour
     public class OnKeySequenceAccepted : UnityEvent<SequenceValidity> { }
     public OnKeySequenceAccepted onKeySequenceAccepted;
 
+    [Serializable]
+    public class OnKeyDown : UnityEvent<KeyCode> { }
+    public OnKeyDown onKeyDown;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -221,6 +225,7 @@ public class KeySquenceInput : MonoBehaviour
                 sequenceState = SequenceState.Playing;
                 deadzoneTime_ms = 0f;
                 lastKey = e.keyCode;
+                onKeyDown.Invoke(e.keyCode);
             }
         }
     }
