@@ -296,9 +296,6 @@ public class KeySquenceInput : MonoBehaviour
             currentKeySequenceLogs["SequenceType"].Add(System.Enum.GetName(typeof(KeyboardSequenceType), keyboardSequence));
             currentKeySequenceLogs["SequenceWindowClosure"].Add(System.Enum.GetName(typeof(SequenceWindowClosure), sequenceWindowClosure));
         }
-
-        sequenceNumber++;
-
         currentKeySequenceLogs["Event"].Add("KeySequenceStopped");
         currentKeySequenceLogs["Date"].Add(System.DateTime.Now.ToString("yyyy-MM-dd"));
         currentKeySequenceLogs["Timestamp"].Add(System.DateTime.Now.ToString("HH:mm:ss.ffff"));
@@ -315,6 +312,8 @@ public class KeySquenceInput : MonoBehaviour
         currentKeySequenceLogs["SequenceWindowClosure"].Add(System.Enum.GetName(typeof(SequenceWindowClosure), sequenceWindowClosure));
         currentKeySequenceLogs["ExpectedKey1"].Add("NA");
         currentKeySequenceLogs["ExpectedKey2"].Add("NA");
+
+        sequenceNumber++;
 
        foreach (string key in currentKeySequenceLogs.Keys)
         {
