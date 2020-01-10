@@ -11,7 +11,6 @@ public class OrangeBehavior : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        anim.Play("Squeezed");
     }
 
     // Update is called once per frame
