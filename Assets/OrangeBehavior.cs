@@ -26,6 +26,10 @@ public class OrangeBehavior : MonoBehaviour
 
     }
 
+    public void ActivateBioFeedback() {
+        anim.Play("SmallSqueeze");
+    }
+
     // TODO: Present a stimuli
 
     IEnumerator Squeeze() {
