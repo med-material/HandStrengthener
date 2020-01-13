@@ -5,7 +5,7 @@ using UnityEngine.Events;
 using System;
 using System.IO;
 
-public struct SequenceData {
+public class SequenceData {
     public int sequenceNumber;
     public SequenceType sequenceType;
     public SequenceComposition sequenceComposition;
@@ -178,8 +178,8 @@ public class KeySquenceInput : MonoBehaviour
     void Update() {
         time_ms += Time.deltaTime;
         deadzoneTime_ms += Time.deltaTime;
-        Debug.Log("sequenceState: " + System.Enum.GetName(typeof(SequenceState), sequenceState));
-        if (sequenceState == SequenceState.Playing) {
+        //Debug.Log("sequenceState: " + System.Enum.GetName(typeof(SequenceState), sequenceState));
+        if(sequenceState == SequenceState.Playing) {
             sequenceWindowClosure = SequenceWindowClosure.Open;
             sequenceTime_ms += Time.deltaTime;
             timeSinceLastPress_ms += Time.deltaTime;
