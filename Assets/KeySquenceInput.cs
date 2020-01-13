@@ -60,8 +60,6 @@ public class KeySquenceInput : MonoBehaviour
     private SequenceState sequenceState = SequenceState.Stopped;
     private SequenceWindowClosure sequenceWindowClosure = SequenceWindowClosure.Open;
 
-    private SequencePolicy sequencePolicy = SequencePolicy.InputForbidden;
-
     private Dictionary<string, List<string>> keySequenceLogs; // Here we collect how fast people pressed the buttons
     private Dictionary<string, List<string>> currentKeySequenceLogs;
     //private Dictionary<string, List<string>> keysToPress;
