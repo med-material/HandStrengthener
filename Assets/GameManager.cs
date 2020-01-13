@@ -6,6 +6,22 @@ using UnityEngine;
 using UnityEngine.Events;
 
 
+public struct GameData {
+    public float fabInputRate;
+    public float recognitionRate;
+    public float startPolicyReview;
+    public int trials;
+    public float interTrialIntervalSeconds;
+    public float anticipationzone;
+    public float inputWindowSeconds;
+    public GameState gameState;
+}
+
+public struct GameTimers {
+    public float inputWindowTimer;
+    public float interTrialTimer;
+}
+
 public enum InputWindowState {
     Closed,
     Open,
@@ -19,7 +35,8 @@ public enum GameState {
 public enum InputTypes {
     AcceptAllInput,
     FabInput,
-    RejectAllInput
+    RejectAllInput,
+    InputWindowExpired,
 }
 
 public class GameManager : MonoBehaviour
@@ -76,13 +93,16 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private float interTrialIntervalSeconds = 4.5f;
     [SerializeField]
+    private float inputWindowSeconds = 1f;
+    private float inputWindowTimer = 0.0f;
+    [SerializeField]
     private float anticipationzone = 0.5f;
     private float interTrialTimer = 0.0f;
 
     private GameState gameState = GameState.Stopped;
 
     [Serializable]
-    public class OnGameStateChanged : UnityEvent<GameState> { }
+    public class OnGameStateChanged : UnityEvent<GameData> { }
     public OnGameStateChanged onGameStateChanged;
 
     [Serializable]
@@ -92,6 +112,10 @@ public class GameManager : MonoBehaviour
     [Serializable]
     public class OnInputWindowChanged : UnityEvent<InputWindowState> { }
     public OnInputWindowChanged onInputWindowChanged;
+
+    [Serializable]
+    public class OnGameTimeUpdate : UnityEvent<GameTimers> { }
+    public OnGameTimeUpdate onGameTimeUpdate;
 
     void Start()
     {
@@ -107,17 +131,43 @@ public class GameManager : MonoBehaviour
         if (inputWindow == InputWindowState.Closed) {
             interTrialTimer += Time.deltaTime;
             if (interTrialTimer > interTrialIntervalSeconds && actualInputOrder.Count < trials) {
-                interTrialTimer = 0;
+                interTrialTimer = 0f;
                 inputWindow = InputWindowState.Open;
                 onInputWindowChanged.Invoke(inputWindow);
             } else if (interTrialTimer > interTrialIntervalSeconds) {
-                interTrialTimer = 0;
+                interTrialTimer = 0f;
                 inputWindow = InputWindowState.Closed;
                 onInputWindowChanged.Invoke(inputWindow);
                 gameState = GameState.Stopped;
-                onGameStateChanged.Invoke(gameState);
+                GameData gameData = createGameData();
+                onGameStateChanged.Invoke(gameData);
+            }
+        } else if (inputWindow == InputWindowState.Open) {
+            inputWindowTimer += Time.deltaTime;
+            if (inputWindowTimer > inputWindowSeconds) {
+                inputWindow = InputWindowState.Closed;
+                inputWindowTimer = 0f;
+                actualInputOrder.Add(InputTypes.InputWindowExpired);
+                onInputWindowChanged.Invoke(inputWindow);
             }
         }
+        GameTimers gameTimers = new GameTimers();
+        gameTimers.interTrialTimer = interTrialTimer;
+        gameTimers.inputWindowTimer = inputWindowTimer;
+        onGameTimeUpdate.Invoke(gameTimers);
+    }
+
+    public GameData createGameData() {
+            GameData gameData = new GameData();
+            gameData.fabInputRate = fabInputRate;
+            gameData.recognitionRate = recognitionRate;
+            gameData.startPolicyReview = startPolicyReview;
+            gameData.trials = trials;
+            gameData.interTrialIntervalSeconds = interTrialIntervalSeconds;
+            gameData.anticipationzone = anticipationzone;
+            gameData.inputWindowSeconds = inputWindowSeconds;
+            gameData.gameState = gameState;
+            return gameData;
     }
 
     public void UpdateDesignedInputOrder() {
@@ -164,7 +214,8 @@ public class GameManager : MonoBehaviour
 
     public void RunGame() {
         gameState = GameState.Running;
-        onGameStateChanged.Invoke(gameState);
+        GameData gameData = createGameData();
+        onGameStateChanged.Invoke(gameData);
 
     }
 
