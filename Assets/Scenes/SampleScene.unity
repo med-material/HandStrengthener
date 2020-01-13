@@ -734,7 +734,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.049469}
+  m_AnchoredPosition: {x: 0, y: 0.04949951}
   m_SizeDelta: {x: 0, y: -0.11279}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1289969459
@@ -1036,6 +1036,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1552617764}
   - component: {fileID: 1552617761}
+  - component: {fileID: 1552617762}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -1053,6 +1054,43 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ab27ba71bd6f5fa43bf6d4ad3d916c71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  fabInputRate: 0.1
+  recognitionRate: 0.4
+  startPolicyReview: 0.2
+  trials: 20
+  interTrialIntervalSeconds: 2.5
+  onGameStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  gameDecision:
+    m_PersistentCalls:
+      m_Calls: []
+  onInputWindowChanged:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2114846533}
+        m_MethodName: set_enabled
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &1552617762
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1552617760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 838a35a33eda1214dae6a5ed6f1d4082, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &1552617764
@@ -1430,12 +1468,12 @@ MonoBehaviour:
   sequenceTimeLimit_ms: 1.3
   deadzoneTimeLimit_ms: 0.7
   keyboardSequence: 0
-  onKeySequenceAccepted:
+  onKeySequenceFinished:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1378474555}
-        m_MethodName: ActivateSuccessFeedback
-        m_Mode: 1
+      - m_Target: {fileID: 1552617761}
+        m_MethodName: OnSequenceReceived
+        m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
