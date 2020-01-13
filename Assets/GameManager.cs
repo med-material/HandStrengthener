@@ -36,15 +36,14 @@ public enum InputTypes {
     AcceptAllInput,
     FabInput,
     RejectAllInput,
-    InputWindowExpired,
 }
 
 public class GameManager : MonoBehaviour
 {
     
     public enum GamePolicy {
-        FreeOperation,
-        MeetDesignGoals,
+        StrictOperation, // this is equivalent to BCI.
+        MeetDesignGoals, // this is equivalent to Fab.Input.
     }
 
     public enum FabInputRate {
@@ -79,16 +78,22 @@ public class GameManager : MonoBehaviour
     // Start is called before the first frame update
 
     [SerializeField]
+    private float noInputReceivedFabAlarm = 0.5f; // fixed alarm in seconds relative to input window, at what point should we try and trigger fab input.
+    private bool inputReceivedThisWindow = false;
+
+    [SerializeField]
     private float startPolicyReview = 0.2f; // percentage of trials which should pass before we start reviewing policy.
 
     [SerializeField]
     private int trials = 20;
 
+    private InputTypes currentInputDecision = InputTypes.RejectAllInput;
+
     private int currentTrial;
 
-    private GamePolicy gamePolicy = GamePolicy.FreeOperation;
+    private GamePolicy gamePolicy = GamePolicy.StrictOperation;
 
-    private InputWindowState inputWindow = InputWindowState.Open;
+    private InputWindowState inputWindow = InputWindowState.Closed;
 
     [SerializeField]
     private float interTrialIntervalSeconds = 4.5f;
@@ -98,6 +103,9 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private float anticipationzone = 0.5f;
     private float interTrialTimer = 0.0f;
+
+    [SerializeField]
+    private float triggerFabInput = 0.0f;
 
     private GameState gameState = GameState.Stopped;
 
@@ -128,33 +136,32 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (inputWindow == InputWindowState.Closed) {
-            interTrialTimer += Time.deltaTime;
-            if (interTrialTimer > interTrialIntervalSeconds && actualInputOrder.Count < trials) {
-                interTrialTimer = 0f;
-                inputWindow = InputWindowState.Open;
-                onInputWindowChanged.Invoke(inputWindow);
-            } else if (interTrialTimer > interTrialIntervalSeconds) {
-                interTrialTimer = 0f;
-                inputWindow = InputWindowState.Closed;
-                onInputWindowChanged.Invoke(inputWindow);
-                gameState = GameState.Stopped;
-                GameData gameData = createGameData();
-                onGameStateChanged.Invoke(gameData);
+        if (gameState == GameState.Running) {
+            if (inputWindow == InputWindowState.Closed) {
+                interTrialTimer += Time.deltaTime;
+                if (interTrialTimer > interTrialIntervalSeconds && actualInputOrder.Count < trials) {
+                    interTrialTimer = 0f;
+                    inputWindow = InputWindowState.Open;
+                    onInputWindowChanged.Invoke(inputWindow);
+                } else if (interTrialTimer > interTrialIntervalSeconds) {
+                    EndGame();
+                }
+            } else if (inputWindow == InputWindowState.Open) {
+                inputWindowTimer += Time.deltaTime;
+
+                if (inputReceivedThisWindow == false && noInputReceivedFabAlarm > inputWindowSeconds) {
+                    // Fire fabricated input (if scheduled).
+                    MakeInputDecision(null, false);
+                } else if (inputWindowTimer > inputWindowSeconds) {
+                    // The input window expired
+                    MakeInputDecision(null, true);
+                }
             }
-        } else if (inputWindow == InputWindowState.Open) {
-            inputWindowTimer += Time.deltaTime;
-            if (inputWindowTimer > inputWindowSeconds) {
-                inputWindow = InputWindowState.Closed;
-                inputWindowTimer = 0f;
-                actualInputOrder.Add(InputTypes.InputWindowExpired);
-                onInputWindowChanged.Invoke(inputWindow);
-            }
+            GameTimers gameTimers = new GameTimers();
+            gameTimers.interTrialTimer = interTrialTimer;
+            gameTimers.inputWindowTimer = inputWindowTimer;
+            onGameTimeUpdate.Invoke(gameTimers);
         }
-        GameTimers gameTimers = new GameTimers();
-        gameTimers.interTrialTimer = interTrialTimer;
-        gameTimers.inputWindowTimer = inputWindowTimer;
-        onGameTimeUpdate.Invoke(gameTimers);
     }
 
     public GameData createGameData() {
@@ -219,8 +226,14 @@ public class GameManager : MonoBehaviour
 
     }
 
-    public void DecideResult() {
-
+    public void EndGame() {
+        interTrialTimer = 0f;
+        if (inputWindow == InputWindowState.Open) {
+            CloseInputWindow();
+        }
+        gameState = GameState.Stopped;
+        GameData gameData = createGameData();
+        onGameStateChanged.Invoke(gameData);
     }
 
     public void ReviewPolicy() {
@@ -235,7 +248,7 @@ public class GameManager : MonoBehaviour
             if (Math.Round(actualRecognitionRate, 1) != recognitionRate) {
                 gamePolicy = GamePolicy.MeetDesignGoals;
             } else {
-                gamePolicy = GamePolicy.FreeOperation;
+                gamePolicy = GamePolicy.StrictOperation;
             }
             Debug.Log("Game Policy: " + System.Enum.GetName(typeof(GamePolicy), gamePolicy));
     }
@@ -245,36 +258,66 @@ public class GameManager : MonoBehaviour
             // ignore the input. The keySequencer will still log that the input has happened.
             return;
         } else {
-            int startPolicyReviewTrial = (int) Math.Floor((trials * startPolicyReview));
-            if (actualInputOrder.Count >= startPolicyReviewTrial) {
-                ReviewPolicy();
-            }
-            InputTypes decision = InputTypes.RejectAllInput;
-            if (gamePolicy == GamePolicy.FreeOperation) {
-                if (designedInputOrder[actualInputOrder.Count] == InputTypes.FabInput) {
-                    decision = InputTypes.FabInput;
-                } else if (sequenceData.sequenceValidity == SequenceValidity.Accepted) {
-                    decision = InputTypes.AcceptAllInput;
-                } else if (sequenceData.sequenceValidity == SequenceValidity.Rejected) {
-                    decision = InputTypes.RejectAllInput;
-                }
+            // This clears the noInput alarm which otherwise would trigger a decision.
+            inputReceivedThisWindow = true;
+            MakeInputDecision(sequenceData);
+        }
+    }
+
+    public void CloseInputWindow() {
+        // update the window state.
+        inputWindow = InputWindowState.Closed;
+        inputWindowTimer = 0f;
+        inputReceivedThisWindow = false;
+        onInputWindowChanged.Invoke(inputWindow);
+
+        // store the input decision.
+        actualInputOrder.Add(currentInputDecision);
+        gameDecision.Invoke(currentInputDecision);
+        UpdateDesignedInputOrder();
+
+        int startPolicyReviewTrial = (int) Math.Floor((trials * startPolicyReview));
+        if (actualInputOrder.Count >= startPolicyReviewTrial) {
+            ReviewPolicy();
+        }
+
+    }
+
+    public void MakeInputDecision(SequenceData sequenceData = null, bool windowExpired = false) {
+
+        // TODO: Handle invalid sequences (too short sequences)
+
+        // if this is in response to receiving an input;
+        // then we evaluate according to this. accept/reject
+        if (sequenceData != null) {
+            if (gamePolicy == GamePolicy.StrictOperation) {
+                    if (designedInputOrder[actualInputOrder.Count] == InputTypes.FabInput) {
+                        currentInputDecision = InputTypes.FabInput;
+                    } else if (sequenceData.sequenceValidity == SequenceValidity.Accepted) {
+                        currentInputDecision  = InputTypes.AcceptAllInput;
+                    } else if (sequenceData.sequenceValidity == SequenceValidity.Rejected) {
+                        currentInputDecision  = InputTypes.RejectAllInput;
+                    }
             } else if (gamePolicy == GamePolicy.MeetDesignGoals) {
                 if (designedInputOrder[actualInputOrder.Count] == InputTypes.AcceptAllInput) {
-                    decision = InputTypes.AcceptAllInput;
+                    currentInputDecision = InputTypes.AcceptAllInput;
                 } else if (designedInputOrder[actualInputOrder.Count] == InputTypes.RejectAllInput) {
-                    decision = InputTypes.RejectAllInput;
+                    currentInputDecision = InputTypes.RejectAllInput;
                 } else if (designedInputOrder[actualInputOrder.Count] == InputTypes.FabInput) {
-                    decision = InputTypes.FabInput;
+                    currentInputDecision = InputTypes.FabInput;
                 }
             }
-            actualInputOrder.Add(decision);
-            gameDecision.Invoke(decision);
-            
-            UpdateDesignedInputOrder();
-
-            inputWindow = InputWindowState.Closed;
-            onInputWindowChanged.Invoke(inputWindow);
+        } else if (sequenceData == null && windowExpired) {
+            // if this is in response to that the input window has expired,
+            // then we submit a Rejection.
+            currentInputDecision = InputTypes.RejectAllInput;
+        } else if (sequenceData == null && designedInputOrder[actualInputOrder.Count] == InputTypes.FabInput) {
+            // if this is in response to an alarm that we dont receive any input,
+            // then we evaluate fab. input.
+            currentInputDecision = InputTypes.FabInput;
         }
+        CloseInputWindow();
+        return;
     }
 
 }
