@@ -5,40 +5,50 @@ using UnityEngine.Events;
 using System;
 using System.IO;
 
+public struct SequenceData {
+    public int sequenceNumber;
+    public SequenceType sequenceType;
+    public SequenceComposition sequenceComposition;
+    public SequenceSpeed sequenceSpeed;
+    public SequenceValidity sequenceValidity;
+    public SequenceWindowClosure sequenceWindowClosure;
+}
+
+public enum SequenceType {
+    HKJL, // HK + J + L
+    TYUI, // T + YU + I
+    SRWES  // SR + W + ES
+}
+
+public enum SequenceState {
+    Playing,
+    Stopped
+}
+
+public enum SequenceComposition {
+    Correct,
+    Mistyped
+}
+
+public enum SequenceSpeed {
+    Slow,
+    Fast
+}
+
+public enum SequenceValidity {
+    Accepted,
+    Rejected,
+}
+
+public enum SequenceWindowClosure {
+    Open,
+    ClosedByDeadzone,
+    ClosedByInputThreshold,
+}
+
+
 public class KeySquenceInput : MonoBehaviour
 {
-
-    public enum KeyboardSequenceType {
-     HKJL, // HK + J + L
-     TYUI, // T + YU + I
-     SRWES  // SR + W + ES
-    }
-
-    public enum SequenceState {
-     Playing,
-     Stopped
-    }
-
-    public enum SequenceComposition {
-     Correct,
-     Mistyped
-    }
-
-    public enum SequenceSpeed {
-     Slow,
-     Fast
-    }
-
-    public enum SequenceValidity {
-     Accepted,
-     Rejected,
-    }
-
-    public enum SequenceWindowClosure {
-     Open,
-     ClosedByDeadzone,
-     ClosedByInputThreshold,
-    }
 
     [SerializeField]
     private float sequenceTimeLimit_ms = 1.5f; // the longest time that the sequence may take (500 ms time limit)
@@ -46,9 +56,11 @@ public class KeySquenceInput : MonoBehaviour
     private float deadzoneTimeLimit_ms = 1f; // the time it takes before we consider an input to belong to a new sequence.
 
     [SerializeField]
-    private KeyboardSequenceType keyboardSequence = KeyboardSequenceType.HKJL;
+    private SequenceType keyboardSequence = SequenceType.HKJL;
     private SequenceState sequenceState = SequenceState.Stopped;
     private SequenceWindowClosure sequenceWindowClosure = SequenceWindowClosure.Open;
+
+    private SequencePolicy sequencePolicy = SequencePolicy.InputForbidden;
 
     private Dictionary<string, List<string>> keySequenceLogs; // Here we collect how fast people pressed the buttons
     private Dictionary<string, List<string>> currentKeySequenceLogs;
@@ -65,6 +77,7 @@ public class KeySquenceInput : MonoBehaviour
     private float timeSinceLastPress_ms = 0f;
     private float sequenceTime_ms = 0f;
     private float deadzoneTime_ms = 0f;
+    
 
     private KeyCode lastKey;
 
@@ -73,9 +86,11 @@ public class KeySquenceInput : MonoBehaviour
     string sep = ",";
     int sequenceNumber = 0;
 
+
+
     [Serializable]
-    public class OnKeySequenceAccepted : UnityEvent<SequenceValidity> { }
-    public OnKeySequenceAccepted onKeySequenceAccepted;
+    public class OnKeySequenceFinished : UnityEvent<SequenceData> { }
+    public OnKeySequenceFinished onKeySequenceFinished;
 
     [Serializable]
     public class OnKeyDown : UnityEvent<KeyCode> { }
@@ -122,7 +137,7 @@ public class KeySquenceInput : MonoBehaviour
         currentKeySequenceLogs["SequenceType"] = new List<string>();
         currentKeySequenceLogs["SequenceWindowClosure"] = new List<string>();
         
-        if (keyboardSequence == KeyboardSequenceType.HKJL) {
+        if (keyboardSequence == SequenceType.HKJL) {
             keysToPress = new KeyCode[4,2]; // 3 sequences, up to 2 keys simultaneously.
             keysToPress[0,0] = KeyCode.H; // In Slot 0 and 1 we check for both H or K keys 
             keysToPress[0,1] = KeyCode.K;
@@ -134,7 +149,7 @@ public class KeySquenceInput : MonoBehaviour
             keysToPress[3,1] = KeyCode.None;
         }
 
-        if (keyboardSequence == KeyboardSequenceType.TYUI) { // T + YU + I
+        if (keyboardSequence == SequenceType.TYUI) { // T + YU + I
             keysToPress = new KeyCode[4,2]; // 3 sequences, up to 2 keys simultaneously.
             keysToPress[0,0] = KeyCode.T; // In Slot 0 and 1 we check for both H or K keys 
             keysToPress[0,1] = KeyCode.None;
@@ -146,7 +161,7 @@ public class KeySquenceInput : MonoBehaviour
             keysToPress[3,1] = KeyCode.None;
         }
 
-        if (keyboardSequence == KeyboardSequenceType.SRWES) { // SR + W + ES
+        if (keyboardSequence == SequenceType.SRWES) { // SR + W + ES
             keysToPress = new KeyCode[5,2]; // 3 sequences, up to 2 keys simultaneously.
             keysToPress[0,0] = KeyCode.S; // In Slot 0 and 1 we check for both H or K keys 
             keysToPress[0,1] = KeyCode.R;
@@ -174,19 +189,19 @@ public class KeySquenceInput : MonoBehaviour
             // If we have enough keys to assess whether the sequence can be validated, do so.
             if (currentKeySequenceLogs["Event"].Count == keysToPress.GetLength(0)) {
                 sequenceWindowClosure = SequenceWindowClosure.ClosedByInputThreshold;
-                SequenceValidity state = CheckCapturedKeys();
-                if (state == SequenceValidity.Accepted) {
-                    onKeySequenceAccepted.Invoke(state);
-                }
+                SequenceData sequenceData = CheckCapturedKeys();
+                //if (state == SequenceValidity.Accepted) {
+                onKeySequenceFinished.Invoke(sequenceData);
+                //}
                 sequenceState = SequenceState.Stopped;
 
             } else if (deadzoneTime_ms > deadzoneTimeLimit_ms) {
                 sequenceWindowClosure = SequenceWindowClosure.ClosedByDeadzone;
                 Debug.Log("No key pressed for " + deadzoneTimeLimit_ms + "seconds, sequence stopped.");
-                SequenceValidity state = CheckCapturedKeys();
-                if (state == SequenceValidity.Accepted) {
-                    onKeySequenceAccepted.Invoke(state);
-                }
+                SequenceData sequenceData = CheckCapturedKeys();
+                //if (state == SequenceValidity.Accepted) {
+                onKeySequenceFinished.Invoke(sequenceData);
+                //}
                 sequenceState = SequenceState.Stopped;
             }
         } else {
@@ -230,14 +245,18 @@ public class KeySquenceInput : MonoBehaviour
         }
     }
 
-    private SequenceValidity CheckCapturedKeys() {
+    private SequenceData CheckCapturedKeys() {
         //if (currentKeySequenceLogs["Event"].Count == 0) {
             // no sequence available, dont do anything.
             //return;
         //}
-        SequenceValidity sequenceValidity = SequenceValidity.Accepted;
-        SequenceSpeed sequenceSpeed = SequenceSpeed.Fast;
-        SequenceComposition sequenceComposition = SequenceComposition.Correct;
+        SequenceData sequenceData = new SequenceData();
+        sequenceData.sequenceValidity = SequenceValidity.Accepted;
+        sequenceData.sequenceSpeed = SequenceSpeed.Fast;
+        sequenceData.sequenceComposition = SequenceComposition.Correct;
+        sequenceData.sequenceType = keyboardSequence;
+        sequenceData.sequenceWindowClosure = sequenceWindowClosure;
+        sequenceData.sequenceNumber = sequenceNumber;
 
         // populate currentKeySequenceLogs with WrongKey values.
         for (int j = 0; j < currentKeySequenceLogs["Event"].Count; j++) {
@@ -263,8 +282,8 @@ public class KeySquenceInput : MonoBehaviour
                 currentKeySequenceLogs["ExpectedKey2"][i] = keysToPress[i,1].ToString();
             } else {
                 // if any keys do not match the desired key, reject it.
-                sequenceComposition = SequenceComposition.Mistyped;
-                sequenceValidity = SequenceValidity.Rejected;
+                sequenceData.sequenceComposition = SequenceComposition.Mistyped;
+                sequenceData.sequenceValidity = SequenceValidity.Rejected;
                 currentKeySequenceLogs["KeyOrder"][i] = "NA";
                 currentKeySequenceLogs["KeyType"][i] = "WrongKey";
                 currentKeySequenceLogs["ExpectedKey1"][i] = keysToPress[i,0].ToString();
@@ -275,26 +294,26 @@ public class KeySquenceInput : MonoBehaviour
 
         // If the sequence was played too slowly, reject it.
         if (sequenceTime_ms > sequenceTimeLimit_ms) {
-            sequenceSpeed = SequenceSpeed.Slow;
-            sequenceValidity = SequenceValidity.Rejected;
+            sequenceData.sequenceSpeed = SequenceSpeed.Slow;
+            sequenceData.sequenceValidity = SequenceValidity.Rejected;
         }
 
         // If the sequence contains too many keys, reject it.
         if (currentKeySequenceLogs["Event"].Count > keysToPress.GetLength(0)) {
-            sequenceComposition = SequenceComposition.Mistyped;
-            sequenceValidity = SequenceValidity.Rejected;
+            sequenceData.sequenceComposition = SequenceComposition.Mistyped;
+            sequenceData.sequenceValidity = SequenceValidity.Rejected;
         } else if (currentKeySequenceLogs["Event"].Count < keysToPress.GetLength(0)) {
-            sequenceSpeed = SequenceSpeed.Slow;
-            sequenceValidity = SequenceValidity.Rejected;
+            sequenceData.sequenceSpeed = SequenceSpeed.Slow;
+            sequenceData.sequenceValidity = SequenceValidity.Rejected;
         }
 
         for (int j = 0; j < currentKeySequenceLogs["Event"].Count; j++) {
-            currentKeySequenceLogs["SequenceNumber"].Add(sequenceNumber.ToString());
-            currentKeySequenceLogs["SequenceComposition"].Add(System.Enum.GetName(typeof(SequenceComposition), sequenceComposition));
-            currentKeySequenceLogs["SequenceSpeed"].Add(System.Enum.GetName(typeof(SequenceSpeed), sequenceSpeed));
-            currentKeySequenceLogs["SequenceValidity"].Add(System.Enum.GetName(typeof(SequenceValidity), sequenceValidity));
-            currentKeySequenceLogs["SequenceType"].Add(System.Enum.GetName(typeof(KeyboardSequenceType), keyboardSequence));
-            currentKeySequenceLogs["SequenceWindowClosure"].Add(System.Enum.GetName(typeof(SequenceWindowClosure), sequenceWindowClosure));
+            currentKeySequenceLogs["SequenceNumber"].Add(sequenceData.sequenceNumber.ToString());
+            currentKeySequenceLogs["SequenceComposition"].Add(System.Enum.GetName(typeof(SequenceComposition), sequenceData.sequenceComposition));
+            currentKeySequenceLogs["SequenceSpeed"].Add(System.Enum.GetName(typeof(SequenceSpeed), sequenceData.sequenceSpeed));
+            currentKeySequenceLogs["SequenceValidity"].Add(System.Enum.GetName(typeof(SequenceValidity), sequenceData.sequenceValidity));
+            currentKeySequenceLogs["SequenceType"].Add(System.Enum.GetName(typeof(SequenceType), sequenceData.sequenceType));
+            currentKeySequenceLogs["SequenceWindowClosure"].Add(System.Enum.GetName(typeof(SequenceWindowClosure), sequenceData.sequenceWindowClosure));
         }
         currentKeySequenceLogs["Event"].Add("KeySequenceStopped");
         currentKeySequenceLogs["Date"].Add(System.DateTime.Now.ToString("yyyy-MM-dd"));
@@ -304,12 +323,12 @@ public class KeySquenceInput : MonoBehaviour
         currentKeySequenceLogs["TimeSinceLastKey_ms"].Add(timeSinceLastPress_ms.ToString());
         currentKeySequenceLogs["KeyOrder"].Add("NA");
         currentKeySequenceLogs["KeyType"].Add("NA");
-        currentKeySequenceLogs["SequenceNumber"].Add(sequenceNumber.ToString());
-        currentKeySequenceLogs["SequenceComposition"].Add(System.Enum.GetName(typeof(SequenceComposition), sequenceComposition));
-        currentKeySequenceLogs["SequenceSpeed"].Add(System.Enum.GetName(typeof(SequenceSpeed), sequenceSpeed));
-        currentKeySequenceLogs["SequenceValidity"].Add(System.Enum.GetName(typeof(SequenceValidity), sequenceValidity));
-        currentKeySequenceLogs["SequenceType"].Add(System.Enum.GetName(typeof(KeyboardSequenceType), keyboardSequence));
-        currentKeySequenceLogs["SequenceWindowClosure"].Add(System.Enum.GetName(typeof(SequenceWindowClosure), sequenceWindowClosure));
+        currentKeySequenceLogs["SequenceNumber"].Add(sequenceData.sequenceNumber.ToString());
+        currentKeySequenceLogs["SequenceComposition"].Add(System.Enum.GetName(typeof(SequenceComposition), sequenceData.sequenceComposition));
+        currentKeySequenceLogs["SequenceSpeed"].Add(System.Enum.GetName(typeof(SequenceSpeed), sequenceData.sequenceSpeed));
+        currentKeySequenceLogs["SequenceValidity"].Add(System.Enum.GetName(typeof(SequenceValidity), sequenceData.sequenceValidity));
+        currentKeySequenceLogs["SequenceType"].Add(System.Enum.GetName(typeof(SequenceType), sequenceData.sequenceType));
+        currentKeySequenceLogs["SequenceWindowClosure"].Add(System.Enum.GetName(typeof(SequenceWindowClosure), sequenceData.sequenceWindowClosure));
         currentKeySequenceLogs["ExpectedKey1"].Add("NA");
         currentKeySequenceLogs["ExpectedKey2"].Add("NA");
 
@@ -326,9 +345,8 @@ public class KeySquenceInput : MonoBehaviour
             Debug.Log("Key: " + key + ", Count: " + currentKeySequenceLogs[key].Count.ToString());
             currentKeySequenceLogs[key].Clear();
         }
-        return sequenceValidity;
+        return sequenceData;
     }
-
 
     // LOGGING
 
