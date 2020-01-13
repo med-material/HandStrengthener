@@ -30,6 +30,14 @@ public class ExperimentTimer : MonoBehaviour
         
     }
 
+    public void onGameStateChanged(GameData gameData) {
+        if (gameData.gameState == GameState.Running) {
+            StartTimer();
+        } else {
+            ResetTimer();
+        }
+    }
+
     public void StartTimer() {
         startTimer = true;
         experimentStart = System.DateTime.Now;
