@@ -19,9 +19,19 @@ public class OrangeBehavior : MonoBehaviour
         this.transform.eulerAngles = new Vector3(this.transform.eulerAngles.x, this.transform.eulerAngles.y+0.05f, this.transform.eulerAngles.z);
     }
 
+    public void onGameDecision(InputTypes inputType) {
+        if (inputType == InputTypes.AcceptAllInput) {
+            ActivateSuccessFeedback();
+            Debug.Log("Showing Feedback from Real Input.");
+        } else if (inputType == InputTypes.FabInput) {
+            ActivateSuccessFeedback();
+            Debug.Log("Showing Feedback from Fabricated Input.");
+        }
+
+    }
+
     public void ActivateSuccessFeedback() {
         StartCoroutine("Squeeze");
-        
         //anim.Play("ballSqueeze");
 
     }
