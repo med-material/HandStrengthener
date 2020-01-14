@@ -12,6 +12,7 @@ public class SequenceData {
     public SequenceSpeed sequenceSpeed;
     public SequenceValidity sequenceValidity;
     public SequenceWindowClosure sequenceWindowClosure;
+    public Dictionary<string, List<string>> keySequenceLogs;
 }
 
 public enum SequenceType {
@@ -97,43 +98,9 @@ public class KeySquenceInput : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        filepath = Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
+        sequenceNumber = 0;
         lastKey = KeyCode.None;
-        keySequenceLogs = new Dictionary<string, List<string>>();
-        keySequenceLogs["Date"] = new List<string>();
-        keySequenceLogs["Timestamp"] = new List<string>();
-        keySequenceLogs["Event"] = new List<string>();
-        keySequenceLogs["KeyCode"] = new List<string>();
-        keySequenceLogs["SequenceTime_ms"] = new List<string>();
-        keySequenceLogs["TimeSinceLastKey_ms"] = new List<string>();
-        keySequenceLogs["KeyOrder"] = new List<string>();
-        keySequenceLogs["KeyType"] = new List<string>();
-        keySequenceLogs["ExpectedKey1"] = new List<string>();
-        keySequenceLogs["ExpectedKey2"] = new List<string>();
-        keySequenceLogs["SequenceNumber"] = new List<string>();
-        keySequenceLogs["SequenceComposition"] = new List<string>();
-        keySequenceLogs["SequenceSpeed"] = new List<string>();
-        keySequenceLogs["SequenceValidity"] = new List<string>();
-        keySequenceLogs["SequenceType"] = new List<string>();
-        keySequenceLogs["SequenceWindowClosure"] = new List<string>();
-
-        currentKeySequenceLogs = new Dictionary<string, List<string>>();
-        currentKeySequenceLogs["Date"] = new List<string>();
-        currentKeySequenceLogs["Timestamp"] = new List<string>();
-        currentKeySequenceLogs["Event"] = new List<string>();
-        currentKeySequenceLogs["KeyCode"] = new List<string>();
-        currentKeySequenceLogs["SequenceTime_ms"] = new List<string>();
-        currentKeySequenceLogs["TimeSinceLastKey_ms"] = new List<string>();
-        currentKeySequenceLogs["KeyOrder"] = new List<string>();
-        currentKeySequenceLogs["KeyType"] = new List<string>();
-        currentKeySequenceLogs["ExpectedKey1"] = new List<string>();
-        currentKeySequenceLogs["ExpectedKey2"] = new List<string>();
-        currentKeySequenceLogs["SequenceNumber"] = new List<string>();
-        currentKeySequenceLogs["SequenceComposition"] = new List<string>();
-        currentKeySequenceLogs["SequenceSpeed"] = new List<string>();
-        currentKeySequenceLogs["SequenceValidity"] = new List<string>();
-        currentKeySequenceLogs["SequenceType"] = new List<string>();
-        currentKeySequenceLogs["SequenceWindowClosure"] = new List<string>();
+        CreateNewSequenceLogs();
         
         if (keyboardSequence == SequenceType.HKJL) {
             keysToPress = new KeyCode[4,2]; // 3 sequences, up to 2 keys simultaneously.
@@ -173,6 +140,26 @@ public class KeySquenceInput : MonoBehaviour
             keysToPress[4,1] = KeyCode.S;
         }        
 
+    }
+
+    public void CreateNewSequenceLogs() {
+        currentKeySequenceLogs = new Dictionary<string, List<string>>();
+        currentKeySequenceLogs["Date"] = new List<string>();
+        currentKeySequenceLogs["Timestamp"] = new List<string>();
+        currentKeySequenceLogs["Event"] = new List<string>();
+        currentKeySequenceLogs["KeyCode"] = new List<string>();
+        currentKeySequenceLogs["SequenceTime_ms"] = new List<string>();
+        currentKeySequenceLogs["TimeSinceLastKey_ms"] = new List<string>();
+        currentKeySequenceLogs["KeyOrder"] = new List<string>();
+        currentKeySequenceLogs["KeyType"] = new List<string>();
+        currentKeySequenceLogs["ExpectedKey1"] = new List<string>();
+        currentKeySequenceLogs["ExpectedKey2"] = new List<string>();
+        currentKeySequenceLogs["SequenceNumber"] = new List<string>();
+        currentKeySequenceLogs["SequenceComposition"] = new List<string>();
+        currentKeySequenceLogs["SequenceSpeed"] = new List<string>();
+        currentKeySequenceLogs["SequenceValidity"] = new List<string>();
+        currentKeySequenceLogs["SequenceType"] = new List<string>();
+        currentKeySequenceLogs["SequenceWindowClosure"] = new List<string>();
     }
 
     void Update() {
@@ -332,23 +319,26 @@ public class KeySquenceInput : MonoBehaviour
 
         sequenceNumber++;
 
-       foreach (string key in currentKeySequenceLogs.Keys)
+        sequenceData.keySequenceLogs = new Dictionary<string, List<string>>(currentKeySequenceLogs);
+
+       /*foreach (string key in currentKeySequenceLogs.Keys)
         {
             keySequenceLogs[key].AddRange(currentKeySequenceLogs[key]);
-            Debug.Log("Key: " + key + ", Count: " + keySequenceLogs[key].Count.ToString());
-        }
+            //Debug.Log("Key: " + key + ", Count: " + keySequenceLogs[key].Count.ToString());
+        }*/
 
-       foreach (string key in currentKeySequenceLogs.Keys)
+       /*foreach (string key in currentKeySequenceLogs.Keys)
         {
-            Debug.Log("Key: " + key + ", Count: " + currentKeySequenceLogs[key].Count.ToString());
+            //Debug.Log("Key: " + key + ", Count: " + currentKeySequenceLogs[key].Count.ToString());
             currentKeySequenceLogs[key].Clear();
-        }
+        }*/
+        CreateNewSequenceLogs();
         return sequenceData;
     }
 
     // LOGGING
 
-    public void LogKeySequence() {
+    /*public void LogKeySequence() {
         if (keySequenceLogs["Event"].Count == 0) {
             Debug.Log("Nothing to log, returning..");
             return;
@@ -394,6 +384,6 @@ public class KeySquenceInput : MonoBehaviour
             
             keySequenceLogs[key].Clear();
         }
-    }
+    }*/
 
 }
