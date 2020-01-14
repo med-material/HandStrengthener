@@ -12,7 +12,6 @@ public struct GameData {
     public float startPolicyReview;
     public int trials;
     public float interTrialIntervalSeconds;
-    public float anticipationzone;
     public float inputWindowSeconds;
     public GameState gameState;
 }
@@ -100,12 +99,7 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private float inputWindowSeconds = 1f;
     private float inputWindowTimer = 0.0f;
-    [SerializeField]
-    private float anticipationzone = 0.5f;
     private float interTrialTimer = 0.0f;
-
-    [SerializeField]
-    private float triggerFabInput = 0.0f;
 
     private GameState gameState = GameState.Stopped;
 
