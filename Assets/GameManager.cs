@@ -303,6 +303,7 @@ public class GameManager : MonoBehaviour
         gameDecisionData.currentRecogRate = actualRecognitionRate;
         gameDecisionData.currentFabRate = actualRecognitionRate;
         gameDecisionData.currentFabAlarm = currentFabAlarm;
+        gameDecisionData.decision = currentInputDecision;
         gameDecision.Invoke(gameDecisionData);
         Debug.Log("designedInputOrder: " + designedInputOrder.Count);
         Debug.Log("actualInputOrder: " + actualInputOrder.Count);
