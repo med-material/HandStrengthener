@@ -80,6 +80,10 @@ public class LoggingManager : MonoBehaviour
         logCollection["FabAlarmVariability"].Add(gameData.fabAlarmVariability.ToString());
         FillKeySequenceColumns();
         FillKeys();
+
+        if (gameData.gameState == GameState.Stopped) {
+            SendLogs();
+        }
     }
 
     public void FillKeySequenceColumns() {
