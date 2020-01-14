@@ -17,8 +17,9 @@ public class SequenceData {
 
 public enum SequenceType {
     HKJL, // HK + J + L
-    TYUI, // T + YU + I
-    SRWES  // SR + W + ES
+    TYUI, // T + YI + U
+    TRWE,  // TR + W + E
+    XCVB, // X + C + VB
 }
 
 public enum SequenceState {
@@ -79,6 +80,7 @@ public class KeySquenceInput : MonoBehaviour
     
 
     private KeyCode lastKey;
+    private KeyCode lastKey2;
 
     string filepath;
     string filename = "keysequencedata";
@@ -119,26 +121,36 @@ public class KeySquenceInput : MonoBehaviour
             keysToPress[0,0] = KeyCode.T; // In Slot 0 and 1 we check for both H or K keys 
             keysToPress[0,1] = KeyCode.None;
             keysToPress[1,0] = KeyCode.Y;
-            keysToPress[1,1] = KeyCode.U;
+            keysToPress[1,1] = KeyCode.I;
             keysToPress[2,0] = KeyCode.Y;
-            keysToPress[2,1] = KeyCode.U;
-            keysToPress[3,0] = KeyCode.I;
+            keysToPress[2,1] = KeyCode.I;
+            keysToPress[3,0] = KeyCode.U;
             keysToPress[3,1] = KeyCode.None;
         }
 
-        if (keyboardSequence == SequenceType.SRWES) { // SR + W + ES
-            keysToPress = new KeyCode[5,2]; // 3 sequences, up to 2 keys simultaneously.
-            keysToPress[0,0] = KeyCode.S; // In Slot 0 and 1 we check for both H or K keys 
+        if (keyboardSequence == SequenceType.TRWE) { // SR + W + E
+            keysToPress = new KeyCode[4,2]; // 3 sequences, up to 2 keys simultaneously.
+            keysToPress[0,0] = KeyCode.T; // In Slot 0 and 1 we check for both H or K keys 
             keysToPress[0,1] = KeyCode.R;
-            keysToPress[1,0] = KeyCode.S;
+            keysToPress[1,0] = KeyCode.T;
             keysToPress[1,1] = KeyCode.R;
             keysToPress[2,0] = KeyCode.W;
             keysToPress[2,1] = KeyCode.None;
             keysToPress[3,0] = KeyCode.E;
-            keysToPress[3,1] = KeyCode.S;
-            keysToPress[4,0] = KeyCode.E;
-            keysToPress[4,1] = KeyCode.S;
+            keysToPress[3,1] = KeyCode.None;
         }        
+
+        if (keyboardSequence == SequenceType.XCVB) { // SR + W + E
+            keysToPress = new KeyCode[4,2]; // 3 sequences, up to 2 keys simultaneously.
+            keysToPress[0,0] = KeyCode.X; // In Slot 0 and 1 we check for both H or K keys 
+            keysToPress[0,1] = KeyCode.None;
+            keysToPress[1,0] = KeyCode.C;
+            keysToPress[1,1] = KeyCode.None;
+            keysToPress[2,0] = KeyCode.V;
+            keysToPress[2,1] = KeyCode.B;
+            keysToPress[3,0] = KeyCode.V;
+            keysToPress[3,1] = KeyCode.B;
+        }   
 
     }
 
@@ -208,7 +220,7 @@ public class KeySquenceInput : MonoBehaviour
                 return;
             }
             if (Event.current.type == EventType.KeyDown) {
-                if (e.keyCode == lastKey) {
+                if (e.keyCode == lastKey || e.keyCode == lastKey2) {
                     // If we detect a new key, but its the same as the previous key, then discard it.
                     return;
                 }
@@ -224,6 +236,7 @@ public class KeySquenceInput : MonoBehaviour
                 timeSinceLastPress_ms = 0f;
                 sequenceState = SequenceState.Playing;
                 deadzoneTime_ms = 0f;
+                lastKey2 = lastKey;
                 lastKey = e.keyCode;
                 onKeyDown.Invoke(e.keyCode);
             }
@@ -278,6 +291,7 @@ public class KeySquenceInput : MonoBehaviour
         }
 
         // If the sequence was played too slowly, reject it.
+        Debug.Log("sequenceTime_ms: " + sequenceTime_ms + ", sequenceTimeLimit_ms: " + sequenceTimeLimit_ms);
         if (sequenceTime_ms > sequenceTimeLimit_ms) {
             sequenceData.sequenceSpeed = SequenceSpeed.Slow;
             sequenceData.sequenceValidity = SequenceValidity.Rejected;
