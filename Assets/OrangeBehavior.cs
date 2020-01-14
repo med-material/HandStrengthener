@@ -19,11 +19,11 @@ public class OrangeBehavior : MonoBehaviour
         this.transform.eulerAngles = new Vector3(this.transform.eulerAngles.x, this.transform.eulerAngles.y+0.05f, this.transform.eulerAngles.z);
     }
 
-    public void onGameDecision(InputTypes inputType) {
-        if (inputType == InputTypes.AcceptAllInput) {
+    public void onGameDecision(GameDecisionData decisionData) {
+        if (decisionData.decision == InputTypes.AcceptAllInput) {
             ActivateSuccessFeedback();
             Debug.Log("Showing Feedback from Real Input.");
-        } else if (inputType == InputTypes.FabInput) {
+        } else if (decisionData.decision == InputTypes.FabInput) {
             ActivateSuccessFeedback();
             Debug.Log("Showing Feedback from Fabricated Input.");
         }

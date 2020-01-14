@@ -16,6 +16,14 @@ public struct GameData {
     public GameState gameState;
     public float noInputReceivedFabAlarm;
     public GamePolicy gamePolicy;
+    public float fabAlarmVariability;
+}
+
+public class GameDecisionData {
+    public InputTypes decision;
+    public float currentFabAlarm;
+    public float currentRecogRate;
+    public float currentFabRate;
 }
 
 public struct GameTimers {
@@ -41,7 +49,6 @@ public enum InputTypes {
 
 public struct GamePolicyData {
     public GamePolicy gamePolicy;
-    public float currentRecogRate;
 }
 
 public enum GamePolicy {
@@ -73,6 +80,9 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private float noInputReceivedFabAlarm = 0.5f; // fixed alarm in seconds relative to input window, at what point should we try and trigger fab input.
+    [SerializeField]
+    private float fabAlarmVariability = 0.5f; //added delay variability to make the alarm unpredictable.
+    private float currentFabAlarm = 0f;
     private bool alarmFired = false;
 
     [SerializeField]
@@ -104,7 +114,7 @@ public class GameManager : MonoBehaviour
     public OnGameStateChanged onGameStateChanged;
 
     [Serializable]
-    public class GameDecision : UnityEvent<InputTypes> { }
+    public class GameDecision : UnityEvent<GameDecisionData> { }
     public GameDecision gameDecision;
 
     [Serializable]
@@ -136,6 +146,7 @@ public class GameManager : MonoBehaviour
                 if (interTrialTimer > interTrialIntervalSeconds && actualInputOrder.Count < trials) {
                     interTrialTimer = 0f;
                     inputWindow = InputWindowState.Open;
+                    setFabAlarmVariability();
                     onInputWindowChanged.Invoke(inputWindow);
                 } else if (interTrialTimer > interTrialIntervalSeconds) {
                     EndGame();
@@ -143,13 +154,13 @@ public class GameManager : MonoBehaviour
             } else if (inputWindow == InputWindowState.Open) {
                 //Debug.Log("inputwindow is open");
                 inputWindowTimer += Time.deltaTime;
-                if (inputWindowTimer > noInputReceivedFabAlarm && alarmFired == false) {
-                    Debug.Log("inputWindowTimer exceeded noInputReceivedFabAlarm.");
+                if (inputWindowTimer > currentFabAlarm && alarmFired == false) {
+                    Debug.Log("inputWindowTimer exceeded currentFabAlarm.");
                     // Fire fabricated input (if scheduled).
                     MakeInputDecision(null, false);
                     alarmFired = true;
                 } else if (inputWindowTimer > inputWindowSeconds) {
-                    Debug.Log("inputWindowTimer exceeded noInputReceivedFabAlarm.");
+                    Debug.Log("inputWindow expired.");
                     // The input window expired
                     MakeInputDecision(null, true);
                     alarmFired = false;
@@ -162,6 +173,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void setFabAlarmVariability() {
+        currentFabAlarm = UnityEngine.Random.Range(noInputReceivedFabAlarm-fabAlarmVariability, noInputReceivedFabAlarm+fabAlarmVariability);
+        Debug.Log("currentFabAlarm set to: " + currentFabAlarm);
+    }
+
     public GameData createGameData() {
             GameData gameData = new GameData();
             gameData.fabInputRate = fabInputRate;
@@ -172,6 +188,7 @@ public class GameManager : MonoBehaviour
             gameData.inputWindowSeconds = inputWindowSeconds;
             gameData.gameState = gameState;
             gameData.noInputReceivedFabAlarm = noInputReceivedFabAlarm;
+            gameData.fabAlarmVariability = fabAlarmVariability;
             return gameData;
     }
 
@@ -279,21 +296,29 @@ public class GameManager : MonoBehaviour
 
         // store the input decision.
         actualInputOrder.Add(currentInputDecision);
-        gameDecision.Invoke(currentInputDecision);
+
+        CalculateRecogRate();
+        // Send Decision Data
+        GameDecisionData gameDecisionData = new GameDecisionData();
+        gameDecisionData.currentRecogRate = actualRecognitionRate;
+        gameDecisionData.currentFabRate = actualRecognitionRate;
+        gameDecisionData.currentFabAlarm = currentFabAlarm;
+        gameDecision.Invoke(gameDecisionData);
         Debug.Log("designedInputOrder: " + designedInputOrder.Count);
         Debug.Log("actualInputOrder: " + actualInputOrder.Count);
         Debug.Log("Decision: " + System.Enum.GetName(typeof(InputTypes), currentInputDecision));
         UpdateDesignedInputOrder();
 
-        CalculateRecogRate();
+
         int startPolicyReviewTrial = (int) Math.Floor((trials * startPolicyReview));
         if (actualInputOrder.Count >= startPolicyReviewTrial) {
             //ReviewPolicy();
         } 
 
+
+
         // update Game Policy
         GamePolicyData gamePolData = new GamePolicyData();
-        gamePolData.currentRecogRate = actualRecognitionRate;
         gamePolData.gamePolicy = gamePolicy;
         onGamePolicyChanged.Invoke(gamePolData);
     }

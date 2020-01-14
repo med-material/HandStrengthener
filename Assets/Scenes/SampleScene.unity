@@ -1541,6 +1541,7 @@ MonoBehaviour:
   fabInputRate: 0.3
   recognitionRate: 0.4
   noInputReceivedFabAlarm: 1
+  fabAlarmVariability: 0.25
   startPolicyReview: 0.4
   trials: 20
   gamePolicy: 1

@@ -44,6 +44,10 @@ public class LoggingManager : MonoBehaviour
         logCollection["GameState"] = new List<string>();
         logCollection["GamePolicy"] = new List<string>();
         logCollection["CurrentRecognitionRate"] = new List<string>();
+        logCollection["FabAlarmFixationPoint"] = new List<string>();
+        logCollection["FabAlarmVariability"] = new List<string>();
+        logCollection["CurrentFabRate"] = new List<string>();
+        logCollection["CurrentFabAlarm"] = new List<string>();
     }
 
     // Update is called once per frame
@@ -72,6 +76,8 @@ public class LoggingManager : MonoBehaviour
         logCollection["InterTrialIntervalSeconds"].Add(gameData.interTrialIntervalSeconds.ToString());
         logCollection["InputWindowSeconds"].Add(gameData.inputWindowSeconds.ToString());
         logCollection["GameState"].Add(System.Enum.GetName(typeof(GameState), gameData.gameState));
+        logCollection["FabAlarmFixationPoint"].Add(gameData.noInputReceivedFabAlarm.ToString());
+        logCollection["FabAlarmVariability"].Add(gameData.fabAlarmVariability.ToString());
         FillKeySequenceColumns();
         FillKeys();
     }
@@ -97,15 +103,17 @@ public class LoggingManager : MonoBehaviour
         logCollection["Date"].Add(System.DateTime.Now.ToString("yyyy-MM-dd"));
         logCollection["Timestamp"].Add(System.DateTime.Now.ToString("HH:mm:ss.ffff"));
         logCollection["GamePolicy"].Add(System.Enum.GetName(typeof(GamePolicy), gamePolicyData.gamePolicy));
-        logCollection["CurrentRecognitionRate"].Add(gamePolicyData.currentRecogRate.ToString());
         FillKeySequenceColumns();
         FillKeys();
     }
 
-    public void onGameDecision(InputTypes decision) {
-        logCollection["Event"].Add("Decision" + System.Enum.GetName(typeof(InputTypes), decision));
+    public void onGameDecision(GameDecisionData decisionData) {
+        logCollection["Event"].Add("Decision" + System.Enum.GetName(typeof(InputTypes), decisionData.decision));
         logCollection["Date"].Add(System.DateTime.Now.ToString("yyyy-MM-dd"));
         logCollection["Timestamp"].Add(System.DateTime.Now.ToString("HH:mm:ss.ffff"));
+        logCollection["CurrentRecognitionRate"].Add(decisionData.currentRecogRate.ToString());
+        logCollection["CurrentFabRate"].Add(decisionData.currentRecogRate.ToString());
+        logCollection["CurrentFabAlarm"].Add(decisionData.currentFabAlarm.ToString());
         // TODO: Whenever there is a GameDecision, we need to "Backfill" KeySequences.
         FillKeySequenceColumns();
         FillKeys();
