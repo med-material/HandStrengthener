@@ -14,6 +14,8 @@ public struct GameData {
     public float interTrialIntervalSeconds;
     public float inputWindowSeconds;
     public GameState gameState;
+    public float noInputReceivedFabAlarm;
+    public GamePolicy gamePolicy;
 }
 
 public struct GameTimers {
@@ -37,26 +39,18 @@ public enum InputTypes {
     RejectAllInput,
 }
 
+public struct GamePolicyData {
+    public GamePolicy gamePolicy;
+    public float currentRecogRate;
+}
+
+public enum GamePolicy {
+    StrictOperation, // this is equivalent to BCI.
+    MeetDesignGoals, // this is equivalent to Fab.Input.
+}
+
 public class GameManager : MonoBehaviour
 {
-    
-    public enum GamePolicy {
-        StrictOperation, // this is equivalent to BCI.
-        MeetDesignGoals, // this is equivalent to Fab.Input.
-    }
-
-    public enum FabInputRate {
-        NoFabInput,
-        FabInput10,
-        FabInput20,
-        FabInput30,
-    }
-
-    public enum RecognitionRate {
-        Rate20,
-        Rate40,
-        Rate60
-    }
 
     // TODO for the future: Fixate fabricated input 1 second, 2 second, 3 second after the input attempt.
     //public enum FabInputDistance {
