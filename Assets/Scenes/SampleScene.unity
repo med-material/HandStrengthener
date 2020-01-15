@@ -2149,9 +2149,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 768faef92dd659246b264b7299bfa39c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sequenceTimeLimit_ms: 1.3
-  deadzoneTimeLimit_ms: 0.4
-  keyboardSequence: 0
+  sequenceTimeLimit_ms: 1.5
+  deadzoneTimeLimit_ms: 0.75
+  keyboardSequence: 2
   onKeySequenceFinished:
     m_PersistentCalls:
       m_Calls:
