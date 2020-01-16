@@ -29,10 +29,15 @@ FabricationAlarm = 1 (when should fabricated input be activated)
 FabricationAlarmVariability = 0.25 (which means Fab.Input. happens between 0.75 - 1.25 seconds)
 ```
 
-KeyInputSequencer settings:
+KeyInputSequencer settings **(New Settings, applied to P. 302, 303, 304, introduced after the new practice mode)**:
 ```
 Deadzone = 0.75
 SequenceTimeLimit_ms = 1.5
+```
+KeyInputSequencer settings **(Old Settings, applied to other participants, this made sequencing too hard)**:
+```
+Deadzone = 0.4
+SequenceTimeLimit_ms = 1.3
 ```
 
 1. The facilitator uses a [randomizer](https://www.random.org/integer-sets/), to choose order of conditions and order of key sequences.  **TODO: For the future, we should make sure that this is counter-balanced.**
