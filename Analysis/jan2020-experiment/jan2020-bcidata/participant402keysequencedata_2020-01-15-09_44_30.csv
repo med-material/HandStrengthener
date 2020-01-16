@@ -1,0 +1,4 @@
+Date,Timestamp,Event,KeyCode,SequenceTime_ms,TimeSinceLastKey_ms,KeyOrder,KeyType,ExpectedKey1,ExpectedKey2,SequenceNumber,SequenceComposition,SequenceSpeed,SequenceValidity,SequenceType,SequenceWindowClosure,TargetFabInputRate,TargetRecognitionRate,StartPolicyReview,Trials,InterTrialIntervalSeconds,InputWindowSeconds,GameState,GamePolicy,CurrentRecognitionRate,FabAlarmFixationPoint,FabAlarmVariability,CurrentFabRate,CurrentFabAlarm,
+2020-01-15,09:44:02.1380,KeyDown,T,0,0,0,CorrectKey,T,None,54,Correct,Slow,Rejected,TYUI,ClosedByDeadzone,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,
+2020-01-15,09:44:02.2039,KeySequenceStopped,NA,0.4013276,0.4013276,NA,NA,NA,NA,54,Correct,Slow,Rejected,TYUI,ClosedByDeadzone,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,
+2020-01-15,09:44:30.5960,Stopped,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,0.2,0.4,0.4,20,2.5,2,Stopped,NA,NA,1,0.25,NA,NA,

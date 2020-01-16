@@ -1,0 +1,2 @@
+Date,Timestamp,Event,KeyCode,SequenceTime_ms,TimeSinceLastKey_ms,KeyOrder,KeyType,ExpectedKey1,ExpectedKey2,SequenceNumber,SequenceComposition,SequenceSpeed,SequenceValidity,SequenceType,SequenceWindowClosure,TargetFabInputRate,TargetRecognitionRate,StartPolicyReview,Trials,InterTrialIntervalSeconds,InputWindowSeconds,GameState,GamePolicy,CurrentRecognitionRate,FabAlarmFixationPoint,FabAlarmVariability,CurrentFabRate,CurrentFabAlarm,
+2020-01-15,09:40:39.9701,Stopped,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,0.4,0.4,0.4,20,2.5,2,Stopped,NA,NA,1,0.25,NA,NA,

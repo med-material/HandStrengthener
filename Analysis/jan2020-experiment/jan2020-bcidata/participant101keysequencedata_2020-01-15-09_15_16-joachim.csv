@@ -1,0 +1,7 @@
+Date,Timestamp,Event,KeyCode,SequenceTime_ms,TimeSinceLastKey_ms,KeyOrder,KeyType,ExpectedKey1,ExpectedKey2,SequenceNumber,SequenceComposition,SequenceSpeed,SequenceValidity,SequenceType,SequenceWindowClosure,TargetFabInputRate,TargetRecognitionRate,StartPolicyReview,Trials,InterTrialIntervalSeconds,InputWindowSeconds,GameState,GamePolicy,CurrentRecognitionRate,FabAlarmFixationPoint,FabAlarmVariability,CurrentFabRate,CurrentFabAlarm,
+2020-01-15,09:14:55.6535,KeyDown,H,0,0,0,CorrectKey,H,K,51,Correct,Fast,Accepted,HKJL,ClosedByInputThreshold,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,
+2020-01-15,09:14:55.6535,KeyDown,K,0,0,1,CorrectKey,H,K,51,Correct,Fast,Accepted,HKJL,ClosedByInputThreshold,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,
+2020-01-15,09:14:55.6545,KeyDown,J,0,0,2,CorrectKey,J,None,51,Correct,Fast,Accepted,HKJL,ClosedByInputThreshold,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,
+2020-01-15,09:14:55.6545,KeyDown,L,0,0,3,CorrectKey,L,None,51,Correct,Fast,Accepted,HKJL,ClosedByInputThreshold,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,
+2020-01-15,09:14:55.6565,KeySequenceStopped,NA,0.3333333,0.3333333,NA,NA,NA,NA,51,Correct,Fast,Accepted,HKJL,ClosedByInputThreshold,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,
+2020-01-15,09:15:16.7426,Stopped,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,0.3,0.4,0.4,20,2.5,2,Stopped,NA,NA,1,0.25,NA,NA,
