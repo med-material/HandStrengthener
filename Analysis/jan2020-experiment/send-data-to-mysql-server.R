@@ -85,9 +85,12 @@ D = D %>% mutate(ProcedureVersion = ifelse(PID %in% newsettingsPID, "v1", "v0.9"
 # Convert the Timestamps to DateTime including the milliseconds.
 # WARNING: If you did "Save" in Excel after importing, the timestamp format may be different.
 D$DateTime <- paste(D$Date,D$Timestamp)
-D$DateTime <- as.POSIXct(D$DateTime, format = "%Y-%m-%d %H:%M:%OS")
+# WARNING: Converting the timestamp to POSIXct will cause dbWriteTable for remove all milliseconds.
+# For the time being it is better to keep it as a string.
+#D$DateTime <- as.POSIXct(D$DateTime, format = "%Y-%m-%d %H:%M:%OS")
 D = subset(D, select = -c(Date,Timestamp )) # Remove the old date columns.
 #to see the 4 decimals in R: format(D$DateTime, "%Y-%m-%d %H:%M:%OS4")
+format(D$DateTime, "%Y-%m-%d %H:%M:%OS4")
 
 # Add conditions
 D$Condition[D$TargetFabInputRate == 0] <- 'B'
@@ -105,23 +108,97 @@ D$CurrentFabAlarm[D$CurrentFabAlarm=='NA'] <- NA
 D$CurrentFabAlarm <- as.numeric(D$CurrentFabAlarm)
 
 # Note that for 302 we are missing the data, but I have created a "missing" file with 1 row, just so his condition is represented and we can merge with survey data.
-D <- D %>% left_join(survey.conditiondata, by=c("PID","Condition"))
-D <- D %>% left_join(survey.experimentdata, by=c("PID"))
+#D <- D %>% left_join(survey.conditiondata, by=c("PID","Condition"))
+#D <- D %>% left_join(survey.experimentdata, by=c("PID"))
 
 
 # Convert timestamps in survey.
 D$Surv.Cond.Timestamp <- as.POSIXct(D$Surv.Cond.Timestamp, format = "%d/%m/%Y %H:%M:%S")
 D$Surv.Exp.Timestamp <- as.POSIXct(D$Surv.Exp.Timestamp, format = "%d/%m/%Y %H:%M:%S")
 
+# Rename columns
+D %>% 
+  rename(
+    Event = Kb.KeyCode,
+    sepal_width = Sepal.Width
+  )
+
+E = data.frame(DateTime = D$DateTime, 
+               Event = D$Event, 
+               PID = D$PID, 
+               TestCondition = D$Condition, 
+               Kb.KeyCode = D$KeyCode, 
+               Kb.KeyValid = D$KeyType, 
+               Kb.ExpectedKey1 = D$ExpectedKey1, 
+               Kb.ExpectedKey2 = D$ExpectedKey2, 
+               Kb.KeyOrder = D$KeyOrder, 
+               Kb.TimeSinceLastKeySeconds = D$TimeSinceLastKey_ms, 
+               Kb.SequenceComposition = D$SequenceComposition,
+               Kb.SequenceNumber = D$SequenceNumber,
+               Kb.SequenceSpeed = D$SequenceSpeed, 
+               Kb.SequenceType = D$SequenceType, 
+               Kb.SequenceValidity = D$SequenceValidity, 
+               Kb.SequenceWindowClosure = D$SequenceWindowClosure, 
+               Kb.SequenceDeadzone = D$SequenceDeadzone, 
+               Kb.SequenceSpeedTarget = D$SequenceWindowTimeLimit,
+               InputWindow.DurationSeconds = D$InputWindowSeconds,
+               InterTrial.DurationSeconds = D$InterTrialIntervalSeconds,
+               RealInput.TargetRate = D$TargetRecognitionRate,
+               FabInput.TargetRate = D$TargetFabInputRate,
+               FabInput.FixationPointSeconds = D$FabAlarmFixationPoint,
+               FabInput.VariabilitySeconds = D$FabAlarmVariability,
+               FabInput.CurrentFixationPoint = D$CurrentFabAlarm,
+               Trials.Amount = D$Trials,
+               RealInput.CurrentRate = D$CurrentRecognitionRate,
+               FabInput.CurrentRate = D$CurrentFabRate,
+               GamePolicy.Type = D$GamePolicy,
+               GamePolicy.ReviewOnTrial = D$StartPolicyReview,
+               GameState = D$GameState, 
+               Exp.GameVersion = "v2020.01.13")
+
 # Debugging that conditions look correct in the survey data.
 #options(max.print=6000)
 #D[D$PID == 604, c("Date","Timestamp", "Condition", "DateTime","TargetFabInputRate")]
 
 # Upload to a database (TODO)
-#library(RMySQL)
-#cred <- read.csv("credentials.csv", header=TRUE,sep=",", colClasses=c("character","character","character","character"))
-#mydb = dbConnect(MySQL(), user=cred[1, "username"], password=cred[1, "password"], dbname=cred[1, "dbname"], host=cred[1, "host"])
+library(RMySQL)
+cred <- read.csv("credentials.csv", header=TRUE,sep=",", colClasses=c("character","character","character","character"))
+mydb = dbConnect(MySQL(), user=cred[1, "username"], password=cred[1, "password"], dbname=cred[1, "dbname"], host=cred[1, "host"])
+dbCreateTable(mydb, "handdata_jan2020",D)
 #D_sorted <- D[order(D$DateTime),]
-#dbWriteTable(mydb, value = data.frame, name = "MyTable", append = TRUE )  # send data to database
+dbWriteTable(mydb, "HandStrengthJan20Experiment", E, append = TRUE, 
+             field.types = c(DateTime="datetime(6)", 
+                             Event="varchar(50)", 
+                             PID="int",
+                             TestCondition = "varchar(50)", 
+                             Kb.KeyCode = "varchar(50)", 
+                             Kb.KeyValid = "varchar(50)", 
+                             Kb.ExpectedKey1 = "varchar(50)", 
+                             Kb.ExpectedKey2 = "varchar(50)", 
+                             Kb.KeyOrder = "int", 
+                             Kb.TimeSinceLastKeySeconds = "double", 
+                             Kb.SequenceComposition = "varchar(50)",
+                             Kb.SequenceNumber = "int",
+                             Kb.SequenceSpeed = "varchar(50)", 
+                             Kb.SequenceType = "varchar(50)", 
+                             Kb.SequenceValidity = "varchar(50)", 
+                             Kb.SequenceWindowClosure = "varchar(50)", 
+                             Kb.SequenceDeadzone = "double", 
+                             Kb.SequenceSpeedTarget = "double",
+                             InputWindow.DurationSeconds = "double",
+                             InterTrial.DurationSeconds = "double",
+                             RealInput.TargetRate = "double",
+                             FabInput.TargetRate = "double",
+                             FabInput.FixationPointSeconds = "double",
+                             FabInput.VariabilitySeconds = "double",
+                             FabInput.CurrentFixationPoint = "double",
+                             Trials.Amount = "int",
+                             RealInput.CurrentRate = "double",
+                             FabInput.CurrentRate = "double",
+                             GamePolicy.Type = "varchar(50)",
+                             GamePolicy.ReviewOnTrial = "varchar(50)",
+                             GameState = "varchar(50)", 
+                             Exp.GameVersion = "varchar(50)"), row.names=FALSE)  # send data to database
+
 
 
