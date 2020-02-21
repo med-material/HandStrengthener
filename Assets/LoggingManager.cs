@@ -48,6 +48,10 @@ public class LoggingManager : MonoBehaviour
         logCollection["FabAlarmVariability"] = new List<string>();
         logCollection["CurrentFabRate"] = new List<string>();
         logCollection["CurrentFabAlarm"] = new List<string>();
+        logCollection["InputConfidence"] = new List<string>();
+        logCollection["InputValidity"] = new List<string>();
+        logCollection["InputType"] = new List<string>();
+        logCollection["InputNumber"] = new List<string>();
     }
 
     // Update is called once per frame
@@ -56,12 +60,27 @@ public class LoggingManager : MonoBehaviour
         
     }
 
-    public void onKeySequenceLogReady(SequenceData sequenceData) {
+    public void onKeySequenceLogReady(SequenceData sequenceData, InputData inputData) {
+        logCollection["InputConfidence"].Add(inputData.confidence.ToString());
+        logCollection["InputValidity"].Add(System.Enum.GetName(typeof(InputValidity), inputData.validity));
+        logCollection["InputType"].Add(System.Enum.GetName(typeof(InputType), inputData.type));
+        logCollection["InputNumber"].Add(inputData.inputNumber.ToString());
        foreach (string key in sequenceData.keySequenceLogs.Keys)
         {
             logCollection[key].AddRange(sequenceData.keySequenceLogs[key]);
             //Debug.Log(sequenceData.keySequenceLogs[key].Count);
         }
+        FillKeys();
+    }
+
+    public void onMotorImageryLogReady(InputData inputData) {
+        logCollection["Event"].Add("InputEvent");
+        logCollection["Date"].Add(System.DateTime.Now.ToString("yyyy-MM-dd"));
+        logCollection["Timestamp"].Add(System.DateTime.Now.ToString("HH:mm:ss.ffff"));
+        logCollection["InputConfidence"].Add(inputData.confidence.ToString());
+        logCollection["InputValidity"].Add(System.Enum.GetName(typeof(InputValidity), inputData.validity));
+        logCollection["InputType"].Add(System.Enum.GetName(typeof(InputType), inputData.type));
+        logCollection["InputNumber"].Add(inputData.inputNumber.ToString());
         FillKeys();
     }
 

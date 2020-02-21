@@ -19,6 +19,23 @@ public struct GameData {
     public float fabAlarmVariability;
 }
 
+public class InputData {
+    public InputValidity validity;
+    public InputType type;
+    public float confidence;
+    public int inputNumber;
+}
+
+public enum InputValidity {
+    Accepted,
+    Rejected
+}
+
+public enum InputType {
+    KeySequence,
+    MotorImagery
+}
+
 public class GameDecisionData {
     public InputTypes decision;
     public float currentFabAlarm;
@@ -277,14 +294,14 @@ public class GameManager : MonoBehaviour
             Debug.Log("Game Policy: " + System.Enum.GetName(typeof(GamePolicy), gamePolicy));
     }
 
-    public void OnSequenceReceived(SequenceData sequenceData) {
+    public void OnInputReceived(InputData inputData) {
         if (inputWindow == InputWindowState.Closed) {
             // ignore the input. The keySequencer will still log that the input has happened.
             return;
         } else {
             // This clears the noInput alarm which otherwise would trigger a decision.
-            Debug.Log("Received sequence: " + sequenceData.sequenceNumber);
-            MakeInputDecision(sequenceData);
+            Debug.Log("Received sequence: " + inputData.inputNumber);
+            MakeInputDecision(inputData);
         }
     }
 
@@ -324,31 +341,31 @@ public class GameManager : MonoBehaviour
         onGamePolicyChanged.Invoke(gamePolData);
     }
 
-    public void MakeInputDecision(SequenceData sequenceData = null, bool windowExpired = false) {
+    public void MakeInputDecision(InputData inputData = null, bool windowExpired = false) {
 
         // TODO: Handle invalid sequences (too short sequences)
 
         // if this is in response to receiving an input;
         // then we evaluate according to this. accept/reject
-        if (sequenceData != null) {
+        if (inputData != null) {
             if (gamePolicy == GamePolicy.StrictOperation) {
                     if (designedInputOrder.First() == InputTypes.FabInput) {
                         currentInputDecision = InputTypes.FabInput;
                         Debug.Log("Case: StrictOperation, Awaiting Fabricated Input.");
-                    } else if (sequenceData.sequenceValidity == SequenceValidity.Accepted) {
+                    } else if (inputData.validity == InputValidity.Accepted) {
                         currentInputDecision  = InputTypes.AcceptAllInput;
                         Debug.Log("Case: StrictOperation, Correct Sequence Played.");
                         CloseInputWindow();
-                    } else if (sequenceData.sequenceValidity == SequenceValidity.Rejected) {
+                    } else if (inputData.validity == InputValidity.Accepted) {
                         currentInputDecision  = InputTypes.RejectAllInput;
-                        Debug.Log("Case: StrictOperation, SequenceIncorrect: " + System.Enum.GetName(typeof(SequenceSpeed), sequenceData.sequenceSpeed) + ", " + System.Enum.GetName(typeof(SequenceComposition), sequenceData.sequenceComposition));
+                        Debug.Log("Case: StrictOperation, Input Incorrect."); // + System.Enum.GetName(typeof(SequenceSpeed), sequenceData.sequenceSpeed) + ", " + System.Enum.GetName(typeof(SequenceComposition), sequenceData.sequenceComposition));
                     }
             } else if (gamePolicy == GamePolicy.MeetDesignGoals) {
                 if (designedInputOrder.First() == InputTypes.AcceptAllInput) {
-                    if (sequenceData.sequenceValidity == SequenceValidity.Accepted) {
+                    if (inputData.validity == InputValidity.Accepted) {
                         currentInputDecision = InputTypes.AcceptAllInput;
                         CloseInputWindow();
-                    } else if (sequenceData.sequenceValidity == SequenceValidity.Accepted) {
+                    } else if (inputData.validity == InputValidity.Accepted) {
                         // Recycles the AcceptAllInput
                         currentInputDecision = InputTypes.RejectAllInput;
                     }
@@ -361,13 +378,13 @@ public class GameManager : MonoBehaviour
                     Debug.Log("Case: MeetDesignGoals, We should Fabricate input no matter what.");
                 }
             }
-        } else if (sequenceData == null && windowExpired) {
+        } else if (inputData == null && windowExpired) {
             // if this is in response to that the input window has expired,
             // then we submit a Rejection.
             currentInputDecision = InputTypes.RejectAllInput;
             Debug.Log("Case: Input Window Expired, Rejecting.");
             CloseInputWindow();
-        } else if (sequenceData == null && designedInputOrder.First() == InputTypes.FabInput) {
+        } else if (inputData == null && designedInputOrder.First() == InputTypes.FabInput) {
             // if this is in response to an alarm that we dont receive any input,
             // then we evaluate fab. input.
             currentInputDecision = InputTypes.FabInput;

@@ -90,8 +90,12 @@ public class KeySquenceInput : MonoBehaviour
 
 
     [Serializable]
-    public class OnKeySequenceFinished : UnityEvent<SequenceData> { }
+    public class OnKeySequenceFinished : UnityEvent<SequenceData, InputData> { }
     public OnKeySequenceFinished onKeySequenceFinished;
+
+    [Serializable]
+    public class OnInputFinished : UnityEvent<InputData> { }
+    public OnInputFinished onInputFinished;
 
     [Serializable]
     public class OnKeyDown : UnityEvent<KeyCode> { }
@@ -187,8 +191,14 @@ public class KeySquenceInput : MonoBehaviour
             if (currentKeySequenceLogs["Event"].Count == keysToPress.GetLength(0)) {
                 sequenceWindowClosure = SequenceWindowClosure.ClosedByInputThreshold;
                 SequenceData sequenceData = CheckCapturedKeys();
+                InputData inputData = new InputData();
+                inputData.validity = InputValidity.Rejected;
+                inputData.confidence = 0;
+                inputData.inputNumber = sequenceData.sequenceNumber;
+                inputData.type = InputType.KeySequence;
                 //if (state == SequenceValidity.Accepted) {
-                onKeySequenceFinished.Invoke(sequenceData);
+                onKeySequenceFinished.Invoke(sequenceData, inputData);
+                onInputFinished.Invoke(inputData);
                 //}
                 sequenceState = SequenceState.Stopped;
 
@@ -196,8 +206,18 @@ public class KeySquenceInput : MonoBehaviour
                 sequenceWindowClosure = SequenceWindowClosure.ClosedByDeadzone;
                 Debug.Log("No key pressed for " + deadzoneTimeLimit_ms + "seconds, sequence stopped.");
                 SequenceData sequenceData = CheckCapturedKeys();
+                InputData inputData = new InputData();
+                inputData.validity = InputValidity.Rejected;
+                inputData.confidence = 0;
+                inputData.inputNumber = sequenceData.sequenceNumber;
+                if (sequenceData.sequenceValidity == SequenceValidity.Accepted) {
+                    inputData.validity = InputValidity.Accepted;
+                    inputData.confidence = 1;
+                }
+                inputData.type = InputType.KeySequence;
                 //if (state == SequenceValidity.Accepted) {
-                onKeySequenceFinished.Invoke(sequenceData);
+                onKeySequenceFinished.Invoke(sequenceData, inputData);
+                onInputFinished.Invoke(inputData);
                 //}
                 sequenceState = SequenceState.Stopped;
             }
