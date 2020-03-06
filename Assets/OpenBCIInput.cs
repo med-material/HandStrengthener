@@ -144,7 +144,7 @@ public class OpenBCIInput : MonoBehaviour
        }
 
        InputData inputData = new InputData();
-       inputData.confidence = confidence;
+       inputData.confidence = 1 - confidence;
        inputData.type = InputType.MotorImagery;
        MotorImageryEvent newClassification = MotorImageryEvent.Rest;
        inputData.validity = InputValidity.Rejected;
