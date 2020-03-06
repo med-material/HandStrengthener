@@ -1859,8 +1859,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab27ba71bd6f5fa43bf6d4ad3d916c71, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fabInputRate: 0.1
-  recognitionRate: 0.4
+  fabInputRate: 0
+  recognitionRate: 1
   noInputReceivedFabAlarm: 1
   fabAlarmVariability: 0.25
   startPolicyReview: 0.4
