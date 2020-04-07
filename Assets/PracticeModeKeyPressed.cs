@@ -26,7 +26,7 @@ public class PracticeModeKeyPressed : MonoBehaviour
         keyPressedText.text += keyCode.ToString();
     }
 
-    public void onKeySequenceFinished(SequenceData sequenceData) {
+    public void onKeySequenceFinished(SequenceData sequenceData, InputData inputData) {
         keyPressedText.text = "";
         result.text = System.Enum.GetName(typeof(SequenceComposition), sequenceData.sequenceComposition) + ", " + System.Enum.GetName(typeof(SequenceSpeed), sequenceData.sequenceSpeed);
 
