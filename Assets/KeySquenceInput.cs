@@ -196,6 +196,10 @@ public class KeySquenceInput : MonoBehaviour
                 inputData.confidence = 0;
                 inputData.inputNumber = sequenceData.sequenceNumber;
                 inputData.type = InputType.KeySequence;
+                if (sequenceData.sequenceValidity == SequenceValidity.Accepted) {
+                    inputData.validity = InputValidity.Accepted;
+                    inputData.confidence = 1;
+                }
                 //if (state == SequenceValidity.Accepted) {
                 onKeySequenceFinished.Invoke(sequenceData, inputData);
                 onInputFinished.Invoke(inputData);
@@ -210,10 +214,6 @@ public class KeySquenceInput : MonoBehaviour
                 inputData.validity = InputValidity.Rejected;
                 inputData.confidence = 0;
                 inputData.inputNumber = sequenceData.sequenceNumber;
-                if (sequenceData.sequenceValidity == SequenceValidity.Accepted) {
-                    inputData.validity = InputValidity.Accepted;
-                    inputData.confidence = 1;
-                }
                 inputData.type = InputType.KeySequence;
                 //if (state == SequenceValidity.Accepted) {
                 onKeySequenceFinished.Invoke(sequenceData, inputData);
