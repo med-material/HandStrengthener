@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -37,7 +38,7 @@ public enum InputType {
 }
 
 public class GameDecisionData {
-    public InputTypes decision;
+    public string decision;
     public float currentFabAlarm;
     public float currentRecogRate;
     public float currentFabRate;
@@ -58,11 +59,12 @@ public enum GameState {
     Stopped,
 }
 
-public enum InputTypes {
-    AcceptAllInput,
-    FabInput,
-    RejectAllInput,
-}
+//public enum InputTypes {
+//    AcceptAllInput,
+//    FabInput,
+//    RejectAllInput,
+    //assistedInput
+//}
 
 public struct GamePolicyData {
     public GamePolicy gamePolicy;
@@ -83,8 +85,20 @@ public class GameManager : MonoBehaviour
     //    OneSecs,
     //}
 
-    private List<InputTypes> designedInputOrder;
-    private List<InputTypes> actualInputOrder;
+    [Serializable]
+    public struct UrnInput {
+        public float acceptInput;
+        public float fabInput;
+        public float rejectInput;
+        //public int assistedInput;
+        //public int assistedEnv;
+    }
+
+    public UrnInput urnInput;
+
+
+    private List<string> designedInputOrder;
+    private List<string> actualInputOrder;
     private List<SequenceData> CurrentSequences;
     
     [SerializeField]
@@ -108,7 +122,7 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private int trials = 20;
 
-    private InputTypes currentInputDecision = InputTypes.RejectAllInput;
+    private string currentInputDecision = "rejectInput";
 
     private int currentTrial;
 
@@ -148,8 +162,8 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        designedInputOrder = new List<InputTypes>();
-        actualInputOrder = new List<InputTypes>();
+        designedInputOrder = new List<string>();
+        actualInputOrder = new List<string>();
         UpdateDesignedInputOrder();
 
     }
@@ -214,44 +228,77 @@ public class GameManager : MonoBehaviour
         // TODO: Take actualInputOrder into account.
         // Count the actual input so far.
         int trialsEnded = actualInputOrder.Count;
-        int fabTrialsEnded = actualInputOrder.Count(c => c == InputTypes.FabInput);
-        int accTrialsEnded = actualInputOrder.Count(c => c == InputTypes.AcceptAllInput);
-        int rejTrialsEnded = actualInputOrder.Count(c => c == InputTypes.RejectAllInput);
+        //List<int> stats = new List<int>();
+        //foreach(var field in typeof(UrnInput).GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)) {
+        //    stats.Add(field.GetValue(urnInput))
+        //}
 
-        int fabTrials = (int) Math.Floor((float) trials * fabInputRate);
-        int accTrials = (int) Math.Floor((float) trials * recognitionRate);
-        int fabTrialsTarget = fabTrials - fabTrialsEnded;
-        int accTrialsTarget = accTrials - accTrialsEnded;
+        Dictionary<string, int> trialTypesEnded = new Dictionary<string, int>();
+        
+        foreach(var field in typeof(UrnInput).GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)) {
+            trialTypesEnded[field.Name] = actualInputOrder.Count(c => c == field.Name);
+        }
+
+        //int fabTrialsEnded = actualInputOrder.Count(c => c == "fabInput");
+        //int accTrialsEnded = actualInputOrder.Count(c => c == "acceptInput");
+        //int rejTrialsEnded = actualInputOrder.Count(c => c == "rejectInput");
+
+        Dictionary<string, int> newTrialTargets = new Dictionary<string, int>();
+        foreach(var field in typeof(UrnInput).GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)) {
+            newTrialTargets[field.Name] = ((int) Math.Floor((float) trials * fabInputRate)) - trialTypesEnded[field.Name];
+        }
+
+
+        foreach (KeyValuePair<string, int> trialtype in trialTypesEnded)
+        {
+            Debug.Log("TrialType = " + trialtype.Key + ", No. of trials ended = " + trialtype.Value);
+        }
+
+        foreach (KeyValuePair<string, int> trialtype in newTrialTargets)
+        {
+            Debug.Log("TrialType = " + trialtype.Key + ", New allocated trials = " + trialtype.Value);
+        }
+
+        //int fabTrials = (int) Math.Floor((float) trials * fabInputRate);
+        //int accTrials = (int) Math.Floor((float) trials * recognitionRate);
+        //int fabTrialsTarget = fabTrials - fabTrialsEnded;
+        //int accTrialsTarget = accTrials - accTrialsEnded;
 
         int remainingTrials = trials - trialsEnded;
 
-        Debug.Log("fabTrials: " + fabTrials + ", ended: " + fabTrialsEnded + ", new target amount: " + fabTrialsTarget);
-        Debug.Log("accTrials: " + accTrials + ", ended: " + accTrialsEnded + ", new target amount: " + accTrialsTarget);
+        //Debug.Log("fabTrials: " + fabTrials + ", ended: " + fabTrialsEnded + ", new target amount: " + fabTrialsTarget);
+        //Debug.Log("accTrials: " + accTrials + ", ended: " + accTrialsEnded + ", new target amount: " + accTrialsTarget);
 
-        for (int i = 0; i < fabTrialsTarget; i++) {
-            designedInputOrder.Add(InputTypes.FabInput);
-        }
-
-        for (int i = 0; i < accTrialsTarget; i++) {
-            if (designedInputOrder.Count < remainingTrials) {
-                designedInputOrder.Add(InputTypes.AcceptAllInput);
+        foreach(var field in typeof(UrnInput).GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)) {
+            for (int i = 0; i < newTrialTargets[field.Name]; i++) {
+                designedInputOrder.Add(field.Name);
             }
         }
+
+        //for (int i = 0; i < fabTrialsTarget; i++) {
+        //    designedInputOrder.Add("fabInput");
+        //}
+
+        //for (int i = 0; i < accTrialsTarget; i++) {
+        //    if (designedInputOrder.Count < remainingTrials) {
+        //        designedInputOrder.Add("acceptInput");
+        //    }
+        //}
 
         Debug.Log("Remaining Trials: " + remainingTrials);
         if (remainingTrials < 0) {
             Debug.LogError("Negative Remaining Trials! (trials: " + trials + ", trialsEnded: " + trialsEnded + ")");
         }
-        int rejTrialsTarget = remainingTrials - (fabTrialsTarget + accTrialsTarget);
-        for (int i = 0; i < rejTrialsTarget; i++) {
-            designedInputOrder.Add(InputTypes.RejectAllInput);
-        }
+        //int rejTrialsTarget = remainingTrials - (fabTrialsTarget + accTrialsTarget);
+        //for (int i = 0; i < rejTrialsTarget; i++) {
+        //    designedInputOrder.Add("rejectInput");
+        //}
 
         Utils.Shuffle(designedInputOrder);
 
         string designedInputString = "";
         foreach (var i in designedInputOrder) {
-            designedInputString += System.Enum.GetName(typeof(InputTypes), i) + " ";
+            designedInputString += i + " ";
         }
         Debug.Log("DesignedInputOrder updated: [ " + designedInputString + " ] Count: " + designedInputOrder.Count);
     }
@@ -274,13 +321,13 @@ public class GameManager : MonoBehaviour
     }
 
     public void CalculateRecogRate() {
-        int actualAcc = actualInputOrder.Count(c => c == InputTypes.AcceptAllInput);
+        int actualAcc = actualInputOrder.Count(c => c == "acceptInput");
         actualRecognitionRate = (float) actualAcc / (float) actualInputOrder.Count;
 
         // TODO: Calculate FabInput Rate
 
-        int designedAcc = designedInputOrder.Count(c => c == InputTypes.AcceptAllInput);
-        int designedRej = designedInputOrder.Count(c => c == InputTypes.RejectAllInput);
+        int designedAcc = designedInputOrder.Count(c => c == "acceptInput");
+        int designedRej = designedInputOrder.Count(c => c == "rejectInput");
         Debug.Log("actualRecognitionRate: " + Math.Round(actualRecognitionRate, 1) + ", recRate: " + recognitionRate);
     }
 
@@ -324,7 +371,7 @@ public class GameManager : MonoBehaviour
         gameDecision.Invoke(gameDecisionData);
         Debug.Log("designedInputOrder: " + designedInputOrder.Count);
         Debug.Log("actualInputOrder: " + actualInputOrder.Count);
-        Debug.Log("Decision: " + System.Enum.GetName(typeof(InputTypes), currentInputDecision));
+        Debug.Log("Decision: " + currentInputDecision);
         UpdateDesignedInputOrder();
 
 
@@ -349,45 +396,46 @@ public class GameManager : MonoBehaviour
         // then we evaluate according to this. accept/reject
         if (inputData != null) {
             if (gamePolicy == GamePolicy.StrictOperation) {
-                    if (designedInputOrder.First() == InputTypes.FabInput) {
-                        currentInputDecision = InputTypes.FabInput;
+                    if (designedInputOrder.First() == "fabInput") {
+                        currentInputDecision = "fabInput";
                         Debug.Log("Case: StrictOperation, Awaiting Fabricated Input.");
                     } else if (inputData.validity == InputValidity.Accepted) {
-                        currentInputDecision  = InputTypes.AcceptAllInput;
+                        currentInputDecision  = "acceptInput";
                         Debug.Log("Case: StrictOperation, Correct Sequence Played.");
                         CloseInputWindow();
-                    } else if (inputData.validity == InputValidity.Accepted) {
-                        currentInputDecision  = InputTypes.RejectAllInput;
+                    } else if (inputData.validity == InputValidity.Rejected) {
+                        currentInputDecision  = "rejectInput";
                         Debug.Log("Case: StrictOperation, Input Incorrect."); // + System.Enum.GetName(typeof(SequenceSpeed), sequenceData.sequenceSpeed) + ", " + System.Enum.GetName(typeof(SequenceComposition), sequenceData.sequenceComposition));
                     }
             } else if (gamePolicy == GamePolicy.MeetDesignGoals) {
-                if (designedInputOrder.First() == InputTypes.AcceptAllInput) {
+                if (designedInputOrder.First() == "acceptInput") {
                     if (inputData.validity == InputValidity.Accepted) {
-                        currentInputDecision = InputTypes.AcceptAllInput;
+                        currentInputDecision = "acceptInput";
                         CloseInputWindow();
-                    } else if (inputData.validity == InputValidity.Accepted) {
+                    } else if (inputData.validity == InputValidity.Rejected) {
                         // Recycles the AcceptAllInput
-                        currentInputDecision = InputTypes.RejectAllInput;
+                        currentInputDecision = "rejectInput";
                     }
                     Debug.Log("Case: MeetDesignGoals, We should Accept this input if it is valid.");
-                } else if (designedInputOrder.First() == InputTypes.RejectAllInput) {
-                    currentInputDecision = InputTypes.RejectAllInput;
+                    Debug.Log("InputValidity: " + System.Enum.GetName(typeof(InputValidity), inputData.validity));
+                } else if (designedInputOrder.First() == "rejectInput") {
+                    currentInputDecision = "rejectInput";
                     Debug.Log("Case: MeetDesignGoals, We should Reject this input no matter what.");
-                } else if (designedInputOrder.First() == InputTypes.FabInput) {
-                    currentInputDecision = InputTypes.FabInput;
+                } else if (designedInputOrder.First() == "fabInput") {
+                    currentInputDecision = "fabInput";
                     Debug.Log("Case: MeetDesignGoals, We should Fabricate input no matter what.");
                 }
             }
         } else if (inputData == null && windowExpired) {
             // if this is in response to that the input window has expired,
             // then we submit a Rejection.
-            currentInputDecision = InputTypes.RejectAllInput;
+            currentInputDecision = "rejectInput";
             Debug.Log("Case: Input Window Expired, Rejecting.");
             CloseInputWindow();
-        } else if (inputData == null && designedInputOrder.First() == InputTypes.FabInput) {
+        } else if (inputData == null && designedInputOrder.First() == "fabInput") {
             // if this is in response to an alarm that we dont receive any input,
             // then we evaluate fab. input.
-            currentInputDecision = InputTypes.FabInput;
+            currentInputDecision = "fabInput";
             Debug.Log("Case: Fabricated Input Fired by Alarm.");
             CloseInputWindow();
         }

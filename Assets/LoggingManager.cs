@@ -131,7 +131,7 @@ public class LoggingManager : MonoBehaviour
     }
 
     public void onGameDecision(GameDecisionData decisionData) {
-        logCollection["Event"].Add("Decision" + System.Enum.GetName(typeof(InputTypes), decisionData.decision));
+        logCollection["Event"].Add("Decision" + decisionData.decision);
         logCollection["Date"].Add(System.DateTime.Now.ToString("yyyy-MM-dd"));
         logCollection["Timestamp"].Add(System.DateTime.Now.ToString("HH:mm:ss.ffff"));
         logCollection["CurrentRecognitionRate"].Add(decisionData.currentRecogRate.ToString());
