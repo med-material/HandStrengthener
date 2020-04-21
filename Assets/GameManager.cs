@@ -55,6 +55,7 @@ public enum InputWindowState {
 
 public enum GameState {
     Running,
+    Paused,
     Stopped,
 }
 
@@ -392,6 +393,28 @@ public class GameManager : MonoBehaviour
             CloseInputWindow();
         }
         return;
+    }
+
+    public void PauseTrial() {
+        gameState = GameState.Paused;
+    }
+
+    public void ResetTrial() {
+        inputWindowTimer = 0f;
+        interTrialTimer = 0f;
+        inputWindow = InputWindowState.Closed;
+    }
+
+    public void ResumeTrial() {
+        gameState = GameState.Running;
+    }
+
+    public void SetInputWindowSeconds(float time) {
+        inputWindowSeconds = time;
+    }
+
+    public void SetInterTrialSeconds(float time) {
+        interTrialIntervalSeconds = time;
     }
 
 }
