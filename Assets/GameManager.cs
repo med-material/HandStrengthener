@@ -184,11 +184,11 @@ public class GameManager : MonoBehaviour
                     alarmFired = false;
                 }
             }
-            GameTimers gameTimers = new GameTimers();
-            gameTimers.interTrialTimer = interTrialTimer;
-            gameTimers.inputWindowTimer = inputWindowTimer;
-            onGameTimeUpdate.Invoke(gameTimers);
         }
+        GameTimers gameTimers = new GameTimers();
+        gameTimers.interTrialTimer = interTrialTimer;
+        gameTimers.inputWindowTimer = inputWindowTimer;
+        onGameTimeUpdate.Invoke(gameTimers);
     }
 
     public void setFabAlarmVariability() {
@@ -401,7 +401,7 @@ public class GameManager : MonoBehaviour
 
     public void ResetTrial() {
         inputWindowTimer = 0f;
-        interTrialTimer = 0f;
+        interTrialTimer = 0.001f;
         inputWindow = InputWindowState.Closed;
     }
 
@@ -411,10 +411,14 @@ public class GameManager : MonoBehaviour
 
     public void SetInputWindowSeconds(float time) {
         inputWindowSeconds = time;
+        GameData gameData = createGameData();
+        onGameStateChanged.Invoke(gameData);        
     }
 
     public void SetInterTrialSeconds(float time) {
         interTrialIntervalSeconds = time;
+        GameData gameData = createGameData();
+        onGameStateChanged.Invoke(gameData);
     }
 
 }
