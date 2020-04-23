@@ -72,6 +72,7 @@ public struct GamePolicyData {
 public enum GamePolicy {
     StrictOperation, // this is equivalent to BCI.
     MeetDesignGoals, // this is equivalent to Fab.Input.
+    LooseOperation // this just accepts whatever input comes in regardless of validity.
 }
 
 public class GameManager : MonoBehaviour
@@ -349,7 +350,12 @@ public class GameManager : MonoBehaviour
         // if this is in response to receiving an input;
         // then we evaluate according to this. accept/reject
         if (inputData != null) {
-            if (gamePolicy == GamePolicy.StrictOperation) {
+            if (gamePolicy == GamePolicy.LooseOperation) {
+                        currentInputDecision  = InputTypes.AcceptAllInput;
+                        Debug.Log("Case: LooseOperation, Input Was Received So Accept it.");
+                        CloseInputWindow();
+            }
+            else if (gamePolicy == GamePolicy.StrictOperation) {
                     if (designedInputOrder.First() == InputTypes.FabInput) {
                         currentInputDecision = InputTypes.FabInput;
                         Debug.Log("Case: StrictOperation, Awaiting Fabricated Input.");
@@ -357,7 +363,7 @@ public class GameManager : MonoBehaviour
                         currentInputDecision  = InputTypes.AcceptAllInput;
                         Debug.Log("Case: StrictOperation, Correct Sequence Played.");
                         CloseInputWindow();
-                    } else if (inputData.validity == InputValidity.Accepted) {
+                    } else if (inputData.validity == InputValidity.Rejected) {
                         currentInputDecision  = InputTypes.RejectAllInput;
                         Debug.Log("Case: StrictOperation, Input Incorrect."); // + System.Enum.GetName(typeof(SequenceSpeed), sequenceData.sequenceSpeed) + ", " + System.Enum.GetName(typeof(SequenceComposition), sequenceData.sequenceComposition));
                     }
