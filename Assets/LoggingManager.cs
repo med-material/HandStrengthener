@@ -203,7 +203,7 @@ public class LoggingManager : MonoBehaviour
             List<string> row = new List<string>();
             foreach (string key in logCollection.Keys)
             {
-                row.Add(logCollection[key][i]);
+                row.Add(logCollection[key][i].Replace(",","."));
             }
             dataString.Add(string.Join(sep, row.ToArray()) + sep);
         }
