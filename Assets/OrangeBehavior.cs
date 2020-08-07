@@ -6,11 +6,19 @@ public class OrangeBehavior : MonoBehaviour
 {
 
     [SerializeField]
+    Material wrongMat;
+    Material correctMat;
+
+    [SerializeField]
     Animator anim;
+
+    private Renderer renderer;
 
     // Start is called before the first frame update
     void Start()
     {
+        renderer = GetComponent<Renderer>();
+        correctMat = renderer.material;
     }
 
     // Update is called once per frame
@@ -26,6 +34,8 @@ public class OrangeBehavior : MonoBehaviour
         } else if (decisionData.decision == InputTypes.FabInput) {
             ActivateSuccessFeedback();
             Debug.Log("Showing Feedback from Fabricated Input.");
+        } else {
+            StartCoroutine("Wrong");
         }
 
     }
@@ -40,11 +50,17 @@ public class OrangeBehavior : MonoBehaviour
         anim.Play("SmallSqueeze");
     }
 
+    IEnumerator Wrong() {
+        renderer.material = wrongMat;
+        yield return new WaitForSeconds(0.5f);
+        renderer.material = correctMat;
+    }
+    
     // TODO: Present a stimuli
 
     IEnumerator Squeeze() {
         //transform.localScale = new Vector3(0.5f,1f,1f);
-        yield return new WaitForSeconds(0.02f);
+        yield return new WaitForSeconds(0.1f);
         anim.Play("Squeezed");
         //Reset();
     }

@@ -521,6 +521,148 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 265056515}
   m_CullTransparentMesh: 0
+--- !u!1 &346280220
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 346280223}
+  - component: {fileID: 346280222}
+  - component: {fileID: 346280221}
+  m_Layer: 0
+  m_Name: SoundManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!82 &346280221
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 346280220}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!114 &346280222
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 346280220}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e62e188005b0944ea57c0d40370f847, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  correctSound: {fileID: 8300000, guid: 3d0dd72f5f98e444f946e0859140c662, type: 3}
+  wrongSound: {fileID: 8300000, guid: 7b39e555f16f21b4cba516995f292144, type: 3}
+--- !u!4 &346280223
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 346280220}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 496.78107, y: 249.53116, z: 46.21043}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 8
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &483650824
 GameObject:
   m_ObjectHideFlags: 0
@@ -1542,7 +1684,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0.16153437, g: 0.20877834, b: 0.2830189, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -1950,7 +2092,6 @@ GameObject:
   - component: {fileID: 1378474556}
   - component: {fileID: 1378474555}
   - component: {fileID: 1378474560}
-  - component: {fileID: 1378474561}
   m_Layer: 0
   m_Name: Orange
   m_TagString: Untagged
@@ -1970,6 +2111,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d876c09e2b1d31a47b6e375e11113dc9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  wrongMat: {fileID: 2100000, guid: 8583ae1e30bd0a94390dcb2e8f07e51a, type: 2}
   anim: {fileID: 1378474560}
 --- !u!135 &1378474556
 SphereCollider:
@@ -2063,18 +2205,6 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
---- !u!114 &1378474561
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1378474554}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8be4b91da894bf842b55677f0de06f42, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1427761970
 GameObject:
   m_ObjectHideFlags: 0
@@ -2416,8 +2546,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab27ba71bd6f5fa43bf6d4ad3d916c71, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fabInputRate: 0
-  recognitionRate: 1
+  fabInputRate: 0.5
+  recognitionRate: 0.4
   noInputReceivedFabAlarm: 1
   fabAlarmVariability: 0.25
   startPolicyReview: 0.4
@@ -2450,22 +2580,11 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 2003089902}
-        m_MethodName: onGameStateChanged
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
   gameDecision:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2003089902}
-        m_MethodName: onGameDecision
+      - m_Target: {fileID: 346280222}
+        m_MethodName: OnGameDecision
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2475,8 +2594,8 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 1378474561}
-        m_MethodName: CoolFeedback
+      - m_Target: {fileID: 1378474555}
+        m_MethodName: onGameDecision
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2488,23 +2607,12 @@ MonoBehaviour:
         m_CallState: 2
   onGamePolicyChanged:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2003089902}
-        m_MethodName: onGamePolicyChanged
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   onInputWindowChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2003089902}
-        m_MethodName: onInputWindowChanged
+      - m_Target: {fileID: 346280222}
+        m_MethodName: OnInputWindowChanged
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3057,9 +3165,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 2003089901}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3cf02026f0c61d74c80fafe63675ecb5, type: 3}
+  m_Script: {fileID: 11500000, guid: 8044bb5719035e14ab33f5a950770e12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  CreateMetaCollection: 1
+  enableMySQLSave: 0
+  email: anonymous
+  connectToMySQL: {fileID: 0}
+  enableCSVSave: 1
+  savePath: C:\Users\biho\aau-private-space\LOGGING
+  filePrefix: log
+  fileExtension: .csv
 --- !u!4 &2003089903
 Transform:
   m_ObjectHideFlags: 0
@@ -3086,7 +3202,6 @@ GameObject:
   - component: {fileID: 2114846533}
   - component: {fileID: 2114846535}
   - component: {fileID: 2114846536}
-  - component: {fileID: 2114846537}
   m_Layer: 0
   m_Name: InputManager
   m_TagString: Untagged
@@ -3108,11 +3223,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sequenceTimeLimit_ms: 1.5
   deadzoneTimeLimit_ms: 0.75
-  keyboardSequence: 3
+  keyboardSequence: 0
   onKeySequenceFinished:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 2003089902}
+      - m_Target: {fileID: 0}
         m_MethodName: onKeySequenceLogReady
         m_Mode: 0
         m_Arguments:
@@ -3235,7 +3350,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 2003089902}
+      - m_Target: {fileID: 0}
         m_MethodName: onMotorImageryLogReady
         m_Mode: 0
         m_Arguments:
@@ -3260,15 +3375,3 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &2114846537
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2114846532}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0f6553a9f0f9c864fa4bc5c390900eea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

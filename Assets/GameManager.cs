@@ -148,12 +148,50 @@ public class GameManager : MonoBehaviour
     public class OnGameTimeUpdate : UnityEvent<GameTimers> { }
     public OnGameTimeUpdate onGameTimeUpdate;
 
+    private LoggingManager loggingManager;
+
     void Start()
     {
         designedInputOrder = new List<InputTypes>();
         actualInputOrder = new List<InputTypes>();
         UpdateDesignedInputOrder();
+        loggingManager = GameObject.Find("LoggingManager").GetComponent<LoggingManager>();
+        LogMeta();
 
+    }
+
+    private void LogMeta() {
+        Dictionary<string, object> metaLog = new Dictionary<string, object>() {
+            {"FabInputRate", fabInputRate},
+            {"RecognitionRate", recognitionRate},
+            {"Trials", trials},
+            {"InterTrialInterval_sec", interTrialIntervalSeconds},
+            {"InputWindow_sec", inputWindowSeconds},
+            {"noInputReceivedFabAlarm_sec", noInputReceivedFabAlarm},
+            {"FabAlarmVariability_sec", fabAlarmVariability},
+        };
+        loggingManager.Log("Meta", metaLog);
+    }
+
+    private void LogEvent(string eventLabel) {
+        Dictionary<string, object> gameLog = new Dictionary<string, object>() {
+            {"Timestamp", System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff")},
+            {"Event", eventLabel},
+            {"InputWindow", System.Enum.GetName(typeof(InputWindowState), inputWindow)},
+            {"InterTrialTimer", interTrialTimer},
+            {"InputWindowTimer", inputWindowTimer},
+            {"GameState", System.Enum.GetName(typeof(GameState), gameState)},
+            {"CurrentRecognitionRate", actualRecognitionRate},
+            {"CurrentFabAlarm", currentFabAlarm},
+        };
+
+        if (eventLabel == "GameDecision") {
+            gameLog["CurrentInputDecision"] = currentInputDecision;
+        } else {
+            gameLog["CurrentInputDecision"] = "NA";
+        }
+
+        loggingManager.Log("Game", gameLog);
     }
 
     // Update is called once per frame
@@ -167,6 +205,7 @@ public class GameManager : MonoBehaviour
                     inputWindow = InputWindowState.Open;
                     setFabAlarmVariability();
                     onInputWindowChanged.Invoke(inputWindow);
+                    LogEvent("InputWindowChange");
                 } else if (interTrialTimer > interTrialIntervalSeconds) {
                     EndGame();
                 }
@@ -255,13 +294,14 @@ public class GameManager : MonoBehaviour
         foreach (var i in designedInputOrder) {
             designedInputString += System.Enum.GetName(typeof(InputTypes), i) + " ";
         }
-        Debug.Log("DesignedInputOrder updated: [ " + designedInputString + " ] Count: " + designedInputOrder.Count);
+        //Debug.Log("DesignedInputOrder updated: [ " + designedInputString + " ] Count: " + designedInputOrder.Count);
     }
 
     public void RunGame() {
         gameState = GameState.Running;
         GameData gameData = createGameData();
         onGameStateChanged.Invoke(gameData);
+        LogEvent("GameRunning");
 
     }
 
@@ -273,6 +313,9 @@ public class GameManager : MonoBehaviour
         gameState = GameState.Stopped;
         GameData gameData = createGameData();
         onGameStateChanged.Invoke(gameData);
+        LogEvent("GameStopped");
+        loggingManager.SaveLog("Game");
+        loggingManager.SaveLog("Meta");
     }
 
     public void CalculateRecogRate() {
@@ -312,6 +355,7 @@ public class GameManager : MonoBehaviour
         inputWindow = InputWindowState.Closed;
         inputWindowTimer = 0f;
         onInputWindowChanged.Invoke(inputWindow);
+        LogEvent("InputWindowChange");
 
         // store the input decision.
         actualInputOrder.Add(currentInputDecision);
@@ -324,6 +368,7 @@ public class GameManager : MonoBehaviour
         gameDecisionData.currentFabAlarm = currentFabAlarm;
         gameDecisionData.decision = currentInputDecision;
         gameDecision.Invoke(gameDecisionData);
+        LogEvent("GameDecision");
         Debug.Log("designedInputOrder: " + designedInputOrder.Count);
         Debug.Log("actualInputOrder: " + actualInputOrder.Count);
         Debug.Log("Decision: " + System.Enum.GetName(typeof(InputTypes), currentInputDecision));
@@ -334,8 +379,6 @@ public class GameManager : MonoBehaviour
         if (actualInputOrder.Count >= startPolicyReviewTrial) {
             //ReviewPolicy();
         } 
-
-
 
         // update Game Policy
         GamePolicyData gamePolData = new GamePolicyData();
@@ -372,11 +415,8 @@ public class GameManager : MonoBehaviour
                     if (inputData.validity == InputValidity.Accepted) {
                         currentInputDecision = InputTypes.AcceptAllInput;
                         CloseInputWindow();
-                    } else if (inputData.validity == InputValidity.Accepted) {
-                        // Recycles the AcceptAllInput
-                        currentInputDecision = InputTypes.RejectAllInput;
                     }
-                    Debug.Log("Case: MeetDesignGoals, We should Accept this input if it is valid.");
+                    Debug.Log("Case: MeetDesignGoals, We should Accept this input.");
                 } else if (designedInputOrder.First() == InputTypes.RejectAllInput) {
                     currentInputDecision = InputTypes.RejectAllInput;
                     Debug.Log("Case: MeetDesignGoals, We should Reject this input no matter what.");
