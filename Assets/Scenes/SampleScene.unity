@@ -1831,7 +1831,7 @@ MonoBehaviour:
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
-          m_BoolArgument: 1
+          m_BoolArgument: 0
         m_CallState: 2
       - m_Target: {fileID: 1756874064}
         m_MethodName: SetActive
@@ -1857,6 +1857,17 @@ MonoBehaviour:
         m_CallState: 2
       - m_Target: {fileID: 1552617761}
         m_MethodName: RunGame
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 2114846535}
+        m_MethodName: StartBlinkDetection
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2143,7 +2154,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 68e2772204d144a4483ce34d9254cf7c, type: 2}
+  - {fileID: 2100000, guid: 90257320ff634f54eb415acf1a5b94be, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2546,15 +2557,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab27ba71bd6f5fa43bf6d4ad3d916c71, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fabInputRate: 0.5
-  recognitionRate: 0.4
-  noInputReceivedFabAlarm: 1
-  fabAlarmVariability: 0.25
+  setupType: 0
+  noInputReceivedFabAlarm: 3
+  fabAlarmVariability: 1.9
   startPolicyReview: 0.4
   trials: 20
   gamePolicy: 1
-  interTrialIntervalSeconds: 2.5
-  inputWindowSeconds: 2
+  interTrialIntervalSeconds: 2
+  inputWindowSeconds: 5
   onGameStateChanged:
     m_PersistentCalls:
       m_Calls:
@@ -3026,6 +3036,28 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 0}
+        m_MethodName: 
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 2114846535}
+        m_MethodName: StopBlinkDetection
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1756874067
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3200,8 +3232,8 @@ GameObject:
   m_Component:
   - component: {fileID: 2114846534}
   - component: {fileID: 2114846533}
-  - component: {fileID: 2114846535}
   - component: {fileID: 2114846536}
+  - component: {fileID: 2114846535}
   m_Layer: 0
   m_Name: InputManager
   m_TagString: Untagged
@@ -3216,13 +3248,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2114846532}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 768faef92dd659246b264b7299bfa39c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sequenceTimeLimit_ms: 1.5
-  deadzoneTimeLimit_ms: 0.75
+  sequenceTimeLimit_ms: 2
+  deadzoneTimeLimit_ms: 2
   keyboardSequence: 0
   onKeySequenceFinished:
     m_PersistentCalls:
@@ -3289,9 +3321,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 2114846532}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6912bfc07ff079f49a80366b2b3af32c, type: 3}
+  m_Script: {fileID: 11500000, guid: d076990866d7a2046b67a6ba7a899656, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  onBlink:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1552617761}
+        m_MethodName: OnInputReceived
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &2114846536
 MonoBehaviour:
   m_ObjectHideFlags: 0

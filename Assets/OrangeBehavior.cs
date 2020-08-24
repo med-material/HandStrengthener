@@ -30,10 +30,10 @@ public class OrangeBehavior : MonoBehaviour
     public void onGameDecision(GameDecisionData decisionData) {
         if (decisionData.decision == InputTypes.AcceptAllInput) {
             ActivateSuccessFeedback();
-            Debug.Log("Showing Feedback from Real Input.");
+            //Debug.Log("Showing Feedback from Real Input.");
         } else if (decisionData.decision == InputTypes.FabInput) {
             ActivateSuccessFeedback();
-            Debug.Log("Showing Feedback from Fabricated Input.");
+            //Debug.Log("Showing Feedback from Fabricated Input.");
         } else {
             StartCoroutine("Wrong");
         }

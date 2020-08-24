@@ -207,7 +207,7 @@ public class KeySquenceInput : MonoBehaviour
     void Update() {
         time_ms += Time.deltaTime;
         deadzoneTime_ms += Time.deltaTime;
-        //Debug.Log("sequenceState: " + System.Enum.GetName(typeof(SequenceState), sequenceState));
+        Debug.Log("sequenceState: " + System.Enum.GetName(typeof(SequenceState), sequenceState));
         if(sequenceState == SequenceState.Playing) {
             sequenceWindowClosure = SequenceWindowClosure.Open;
             sequenceTime_ms += Time.deltaTime;
@@ -234,7 +234,7 @@ public class KeySquenceInput : MonoBehaviour
 
             } else if (deadzoneTime_ms > deadzoneTimeLimit_ms) {
                 sequenceWindowClosure = SequenceWindowClosure.ClosedByDeadzone;
-                Debug.Log("No key pressed for " + deadzoneTimeLimit_ms + "seconds, sequence stopped.");
+               Debug.Log("No key pressed for " + deadzoneTimeLimit_ms + "seconds, sequence stopped.");
                 SequenceData sequenceData = CheckCapturedKeys();
                 InputData inputData = new InputData();
                 inputData.validity = InputValidity.Rejected;
@@ -270,9 +270,9 @@ public class KeySquenceInput : MonoBehaviour
                     // If we detect a new key, but its the same as the previous key, then discard it.
                     return;
                 }
-                Debug.Log("Key is " + e.keyCode.ToString());
+               Debug.Log("Key is " + e.keyCode.ToString());
                 // TODO: Log EventType.KeyUp too
-                Debug.Log("Detected key code: " + e.keyCode + " time:" + time_ms);
+               Debug.Log("Detected key code: " + e.keyCode + " time:" + time_ms);
                 currentKeySequenceLogs["Date"].Add(System.DateTime.Now.ToString("yyyy-MM-dd"));
                 currentKeySequenceLogs["Timestamp"].Add(System.DateTime.Now.ToString("HH:mm:ss.ffff"));
                 currentKeySequenceLogs["Event"].Add("KeyDown");
@@ -305,7 +305,7 @@ public class KeySquenceInput : MonoBehaviour
 
         // populate currentKeySequenceLogs with WrongKey values.
         for (int j = 0; j < currentKeySequenceLogs["Event"].Count; j++) {
-            Debug.Log("Populating for Key: " + currentKeySequenceLogs["KeyCode"][j].ToString());
+           Debug.Log("Populating for Key: " + currentKeySequenceLogs["KeyCode"][j].ToString());
             currentKeySequenceLogs["KeyOrder"].Add("NA");
             currentKeySequenceLogs["KeyType"].Add("WrongKey");
             currentKeySequenceLogs["ExpectedKey1"].Add("NA");
@@ -318,8 +318,8 @@ public class KeySquenceInput : MonoBehaviour
             }
 
             // for each i, we need to check if the first key pressed, matches either keysToPress[i,0] or [i,1]
-            Debug.Log("Checking Key: " + currentKeySequenceLogs["KeyCode"][i]);
-            Debug.Log("i = " + i + ", keysToPress: " + keysToPress.GetLength(0) + " currentKeySequenceLogs: " + currentKeySequenceLogs["KeyCode"].Count);
+           Debug.Log("Checking Key: " + currentKeySequenceLogs["KeyCode"][i]);
+           Debug.Log("i = " + i + ", keysToPress: " + keysToPress.GetLength(0) + " currentKeySequenceLogs: " + currentKeySequenceLogs["KeyCode"].Count);
             if (currentKeySequenceLogs["KeyCode"][i] == keysToPress[i,0].ToString() || currentKeySequenceLogs["KeyCode"][i] == keysToPress[i,1].ToString()) {
                 currentKeySequenceLogs["KeyOrder"][i] = i.ToString();
                 currentKeySequenceLogs["KeyType"][i]  = "CorrectKey";
@@ -338,7 +338,7 @@ public class KeySquenceInput : MonoBehaviour
         }
 
         // If the sequence was played too slowly, reject it.
-        Debug.Log("sequenceTime_ms: " + sequenceTime_ms + ", sequenceTimeLimit_ms: " + sequenceTimeLimit_ms);
+       Debug.Log("sequenceTime_ms: " + sequenceTime_ms + ", sequenceTimeLimit_ms: " + sequenceTimeLimit_ms);
         if (sequenceTime_ms > sequenceTimeLimit_ms) {
             sequenceData.sequenceSpeed = SequenceSpeed.Slow;
             sequenceData.sequenceValidity = SequenceValidity.Rejected;
@@ -406,12 +406,12 @@ public class KeySquenceInput : MonoBehaviour
        /*foreach (string key in currentKeySequenceLogs.Keys)
         {
             keySequenceLogs[key].AddRange(currentKeySequenceLogs[key]);
-            //Debug.Log("Key: " + key + ", Count: " + keySequenceLogs[key].Count.ToString());
+            Debug.Log("Key: " + key + ", Count: " + keySequenceLogs[key].Count.ToString());
         }*/
 
        /*foreach (string key in currentKeySequenceLogs.Keys)
         {
-            //Debug.Log("Key: " + key + ", Count: " + currentKeySequenceLogs[key].Count.ToString());
+            Debug.Log("Key: " + key + ", Count: " + currentKeySequenceLogs[key].Count.ToString());
             currentKeySequenceLogs[key].Clear();
         }*/
         CreateNewSequenceLogs();
@@ -423,11 +423,11 @@ public class KeySquenceInput : MonoBehaviour
 
     /*public void LogKeySequence() {
         if (keySequenceLogs["Event"].Count == 0) {
-            Debug.Log("Nothing to log, returning..");
+           Debug.Log("Nothing to log, returning..");
             return;
         }
 
-        Debug.Log("Saving " + keySequenceLogs["Event"].Count + " Rows to " + filepath);
+       Debug.Log("Saving " + keySequenceLogs["Event"].Count + " Rows to " + filepath);
         sequenceNumber = 0;
         string dest = filepath + "\\" + filename + "_" + System.DateTime.Now.ToString("HH_mm_ss") + ".csv";
 
