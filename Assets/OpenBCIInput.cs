@@ -51,6 +51,11 @@ public class OpenBCIInput : MonoBehaviour
     private MotorImageryEvent classification = MotorImageryEvent.Rest;
     public float classificationThreshold = 0.7f;
 
+    private int[] consecThresholdBuffer;
+    private int consecThresholdIndex = 0;
+    public int  consecutiveBufferSize = 8;
+
+
     private int testSampleChannelSize;
     private int testSampleCount;
     private int testChannelCount;
@@ -112,6 +117,7 @@ public class OpenBCIInput : MonoBehaviour
             instance = this;
         }
         DontDestroyOnLoad(this);
+        consecThresholdBuffer = new int[consecutiveBufferSize];
         bciState = BCIState.Disconnected;
         onBCIStateChanged.Invoke(Enum.GetName(typeof(BCIState), bciState), "");
         StartCoroutine("ConnectToBCI");
@@ -156,6 +162,8 @@ public class OpenBCIInput : MonoBehaviour
        inputData.validity = InputValidity.Rejected;
        if (bciProcessingMode == BCIProcessingMode.SingleThreshold) {
            newClassification = ProcessSingleThreshold(confidence);
+       } else if (bciProcessingMode == BCIProcessingMode.ConsecutiveThreshold) {
+           newClassification = ProcessConsecutiveThreshold(confidence);
        }
        if (newClassification == MotorImageryEvent.MotorImagery) {
            inputData.validity = InputValidity.Accepted;
@@ -179,6 +187,31 @@ public class OpenBCIInput : MonoBehaviour
            newClassification = MotorImageryEvent.MotorImagery;
        }
        return newClassification;
+    }
+
+    private MotorImageryEvent ProcessConsecutiveThreshold(float confidence) {
+        MotorImageryEvent newClassification = MotorImageryEvent.Rest;
+
+        // If our confidence value is higher than the threshold, add a 1 to the buffer.
+        if (confidence > classificationThreshold) {
+            consecThresholdBuffer[consecThresholdIndex] = 1;
+        } else {
+            consecThresholdBuffer[consecThresholdIndex] = 0;
+        }
+
+        // if all positions in the buffer carry a 1, we have motor imagery.
+        if (consecThresholdBuffer.Sum() == consecutiveBufferSize) {
+            newClassification = MotorImageryEvent.MotorImagery;
+        }
+
+        // Increment our buffer index.
+        if (consecThresholdIndex < consecutiveBufferSize-1) {
+            consecThresholdIndex++;
+        } else {
+            consecThresholdIndex = 0;
+        }
+
+        return newClassification;
     }
 
     private IEnumerator ConnectToBCI() {
