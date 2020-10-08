@@ -8,7 +8,8 @@ using System.IO;
 
 public enum EyeState {
     EyesOpen,
-    EyesClosed
+    EyesClosed,
+    Unintialized
 }
 
 public enum DetectorState {
@@ -18,7 +19,7 @@ public enum DetectorState {
 
 public class BlinkDetector : MonoBehaviour
 {
-    private EyeState eyeState = EyeState.EyesOpen;
+    private EyeState eyeState = EyeState.Unintialized;
     private DetectorState state = DetectorState.Stopped;
 
     private float duration = 0f;
@@ -41,21 +42,14 @@ public class BlinkDetector : MonoBehaviour
     void Update()
     {
         if (state == DetectorState.Started) {
-            // If eyes are CLOSED
-            if (!TobiiAPI.GetGazePoint().IsRecent(0.1f))
+            // If eyes are OPEN
+            Debug.Log(TobiiAPI.GetGazePoint().IsRecent(0.1f));
+            Debug.Log("eyestate: " + Enum.GetName(typeof(EyeState), eyeState));
+            if (TobiiAPI.GetGazePoint().IsRecent(0.1f))
             {
-                if (eyeState == EyeState.EyesOpen) {
-                    eyeState = EyeState.EyesClosed;
-                    LogBlink();
-                }
-                duration = 0f;
-            }
-            // if eyes are OPEN
-            else
-            {
-                if (eyeState == EyeState.EyesClosed) {
+                if (eyeState == EyeState.EyesClosed || eyeState == EyeState.Unintialized) {
                     eyeState = EyeState.EyesOpen;
-                    timestamp = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff") + "bleh";
+                    LogEyeOpen();
                     blinkNo++;
                     InputData inputData = new InputData();
                     inputData.validity = InputValidity.Accepted;
@@ -64,15 +58,30 @@ public class BlinkDetector : MonoBehaviour
                     inputData.inputNumber = blinkNo;
                     onBlink.Invoke(inputData);
                 }
+                duration = 0f;
+            } else
+            {
+                if (eyeState == EyeState.EyesOpen || eyeState == EyeState.Unintialized) {
+                    eyeState = EyeState.EyesClosed;
+                    timestamp = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff");
+                    LogEyeClose();
+                }
                 duration += Time.deltaTime;
             }
         }
     }
 
-    private void LogBlink() {
-        loggingManager.Log("BlinkLog", "Timestamp", timestamp); // NOTE: THIS TIMESTAMP IS BEING OVERWRITTEN!!!
-        loggingManager.Log("BlinkLog", "Event", "Blink");
-        loggingManager.Log("BlinkLog", "Duration_s", duration);
+    private void LogEyeOpen() {
+        loggingManager.Log("BlinkLog", "Event", "EyeOpening");
+        loggingManager.Log("BlinkLog", "BlinkNo", blinkNo);
+        loggingManager.Log("BlinkLog", "DurationClosed_s", duration);
+        loggingManager.SaveLog("BlinkLog");
+        loggingManager.ClearLog("BlinkLog");
+    }
+
+    private void LogEyeClose() {
+        //loggingManager.Log("BlinkLog", "TimestampEye", timestamp);
+        loggingManager.Log("BlinkLog", "Event", "EyeClosing");
         loggingManager.Log("BlinkLog", "BlinkNo", blinkNo);
         loggingManager.SaveLog("BlinkLog");
         loggingManager.ClearLog("BlinkLog");
