@@ -52,6 +52,7 @@ public class OpenBCIInput : MonoBehaviour
     public float classificationThreshold = 0.7f;
 
     private int[] consecThresholdBuffer;
+    private float[] consecThresholdBufferVal;
     private int consecThresholdIndex = 0;
     public int  consecutiveBufferSize = 8;
 
@@ -59,6 +60,7 @@ public class OpenBCIInput : MonoBehaviour
     private int testSampleChannelSize;
     private int testSampleCount;
     private int testChannelCount;
+    private float confidence;
 
     private double[,] lastMatrix;
 
@@ -111,6 +113,8 @@ public class OpenBCIInput : MonoBehaviour
 
     private static OpenBCIInput instance;
 
+    private LoggingManager loggingManager;
+
     void Start()
     {
         if (instance == null) {
@@ -118,43 +122,71 @@ public class OpenBCIInput : MonoBehaviour
         }
         DontDestroyOnLoad(this);
         consecThresholdBuffer = new int[consecutiveBufferSize];
+        consecThresholdBufferVal = new float[consecutiveBufferSize];
         bciState = BCIState.Disconnected;
+        loggingManager = GameObject.Find("LoggingManager").GetComponent<LoggingManager>();
+        LogMeta();
         onBCIStateChanged.Invoke(Enum.GetName(typeof(BCIState), bciState), "");
         StartCoroutine("ConnectToBCI");
     }
 
-    public void StartLogging() {
-        BCILogs = new Dictionary<string, List<string>>();
-        BCILogs["Date"] = new List<string>();
-        BCILogs["Timestamp"] = new List<string>();
-        BCILogs["Event"] = new List<string>();
-        BCILogs["MIEvent"] = new List<string>(); // TRUE, FALSE
-        BCILogs["MIConfidence"] = new List<string>(); // fx 0.43
-        BCILogs["RestConfidence"] = new List<string>(); // fx 0.51
-        BCILogs["BCIState"] = new List<string>(); // fx "Connected, Disconnected, ReadingData"
+    private void LogMeta() {
+        Dictionary<string, object> metaLog = new Dictionary<string, object>() {
+            {"ConfidenceThreshold", classificationThreshold},
+            {"BCIProcessingMode", Enum.GetName(typeof(BCIProcessingMode), bciProcessingMode)},
+            {"ConsecutiveThresholdBufferSize", consecutiveBufferSize},
+        };
+        loggingManager.Log("Meta", metaLog);
     }
 
-    public void LogEvent(String myevent = "", MotorImageryEvent miEvent = MotorImageryEvent.Rest, float miConfidence = -1f, float restConfidence = -1f) {
-        BCILogs["Date"].Add(System.DateTime.Now.ToString("yyyy-MM-dd"));
-        BCILogs["Timestamp"].Add(System.DateTime.Now.ToString("HH:mm:ss.ffff"));
-        BCILogs["Event"].Add(myevent);
-        BCILogs["MIEvent"].Add(Enum.GetName(typeof(MotorImageryEvent), miEvent)); // TRUE, FALSE
-        BCILogs["MIConfidence"].Add(miConfidence.ToString()); // fx 0.43
-        BCILogs["RestConfidence"].Add(restConfidence.ToString()); // fx 0.51
-        BCILogs["BCIState"].Add(Enum.GetName(typeof(BCIState), bciState));
+    private void LogMotorImageryEvent(MotorImageryEvent miEvent = MotorImageryEvent.Rest, float lastConfidence = -1f) {
+        Dictionary<string, object> gameLog = new Dictionary<string, object>() {
+            {"Event", Enum.GetName(typeof(MotorImageryEvent), miEvent)},
+            {"BCIConfidence", lastConfidence},
+            {"BCIState", Enum.GetName(typeof(BCIState), bciState)},
+        };
+        loggingManager.Log("Game", gameLog);
+        string buffer = "(";
+        if (bciProcessingMode == BCIProcessingMode.ConsecutiveThreshold) {
+            foreach(float t in consecThresholdBufferVal) {
+                buffer += t.ToString("0.000") + " ";
+            }
+            buffer += ")";
+        }
+        loggingManager.Log("Game", "BCIThresholdBuffer", buffer);
     }
 
-    void FixedUpdate()
+    private void LogStateEvent() {
+        Dictionary<string, object> gameLog = new Dictionary<string, object>() {
+            {"Event", "BCIStateUpdated"},
+            {"BCIState", Enum.GetName(typeof(BCIState), bciState)},
+        };
+        loggingManager.Log("Game", gameLog);
+    }
+
+    private void LogSample(string eventLabel) {
+        Dictionary<string, object> sampleLog = new Dictionary<string, object>() {
+            {"Event", eventLabel},
+            {"BCIConfidence", confidence},
+            {"BCIState", Enum.GetName(typeof(BCIState), bciState)},
+        };
+        loggingManager.Log("Sample", sampleLog);
+    }
+
+    void Update()
     {
         if (bciState == BCIState.Disconnected) {
             return;
         }
-       float confidence = ((float)ReadSocket());
+       confidence = ((float)ReadSocket());
        if (confidence == -1f) {
+            LogSample("NoData");
            // No Stream available.
            return;
        }
-
+       // Update() runs faster (1/60) than our input data (1/16) arrives.
+       // The code below is only run whenever a new value comes in from the BCI side.
+       LogSample("Sample");
        InputData inputData = new InputData();
        inputData.confidence = 1 - confidence;
        inputData.type = InputType.MotorImagery;
@@ -171,6 +203,7 @@ public class OpenBCIInput : MonoBehaviour
        if (newClassification != classification) {
            inputNumber++;
            inputData.inputNumber = inputNumber;
+           LogMotorImageryEvent(newClassification, confidence);
            onBCIMotorImagery.Invoke(newClassification);
            onInputFinished.Invoke(inputData);
            classification = newClassification;
@@ -195,8 +228,10 @@ public class OpenBCIInput : MonoBehaviour
         // If our confidence value is higher than the threshold, add a 1 to the buffer.
         if (confidence > classificationThreshold) {
             consecThresholdBuffer[consecThresholdIndex] = 1;
+            consecThresholdBufferVal[consecThresholdIndex] = confidence;
         } else {
             consecThresholdBuffer[consecThresholdIndex] = 0;
+            consecThresholdBufferVal[consecThresholdIndex] = confidence;
         }
 
         // if all positions in the buffer carry a 1, we have motor imagery.
@@ -217,6 +252,7 @@ public class OpenBCIInput : MonoBehaviour
     private IEnumerator ConnectToBCI() {
         while (mySocket == null || !mySocket.Connected) {
             bciState = BCIState.Connecting;
+            LogStateEvent();
             onBCIStateChanged.Invoke(Enum.GetName(typeof(BCIState), bciState), "Establishing connection to BCI Socket..");     
             yield return new WaitForSeconds(0.5f);
             try {
@@ -235,6 +271,7 @@ public class OpenBCIInput : MonoBehaviour
             }
         }
         bciState = BCIState.ReceivingHeader;
+        LogStateEvent();
         onBCIStateChanged.Invoke(Enum.GetName(typeof(BCIState), bciState), "Waiting for data..Make sure that Acquisition is paired with PC.");
         StateObject state = new StateObject();
         state.workSocket = mySocket;
@@ -258,6 +295,7 @@ public class OpenBCIInput : MonoBehaviour
             {
                 ReadHeader();
                 bciState = BCIState.ReceivingData;
+                LogStateEvent();
                 onBCIStateChanged.Invoke(Enum.GetName(typeof(BCIState), bciState), "");
             }
 
@@ -384,10 +422,13 @@ public class OpenBCIInput : MonoBehaviour
             mySocket.Close();
         }
         bciState = BCIState.Disconnected;
+        LogStateEvent();
         onBCIStateChanged.Invoke(Enum.GetName(typeof(BCIState), bciState), "");
 	}
 	void OnApplicationQuit(){
-		Disconnect();
+        if (this.enabled) {
+		    Disconnect();
+        }
 	}
 
 }

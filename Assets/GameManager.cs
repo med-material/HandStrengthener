@@ -462,6 +462,7 @@ public class GameManager : MonoBehaviour
         onGameStateChanged.Invoke(gameData);
         LogEvent("GameStopped");
         loggingManager.SaveLog("Game");
+        loggingManager.SaveLog("Sample");
         loggingManager.SaveLog("Meta");
     }
 
