@@ -90,10 +90,14 @@ public class LoggingManager : MonoBehaviour
     }
 
     public void SaveLog(string collectionLabel) {
-        if (Application.platform != RuntimePlatform.WebGLPlayer) {
-            SaveToCSV(collectionLabel);
+        if (collections.ContainsKey(collectionLabel)) {
+            if (Application.platform != RuntimePlatform.WebGLPlayer) {
+                SaveToCSV(collectionLabel);
+            }
+            SaveToSQL(collectionLabel);
+        } else {
+            Debug.LogError("No Collection Called " + collectionLabel);
         }
-        SaveToSQL(collectionLabel);
     }
 
     public void CreateLog(string collectionLabel) {
@@ -112,6 +116,9 @@ public class LoggingManager : MonoBehaviour
                 if (!collections[collectionLabel].log.ContainsKey("Timestamp")) {
                     collections[collectionLabel].log["Timestamp"] = new Dictionary<int, object>();
                 }
+                if (!collections[collectionLabel].log.ContainsKey("Framecount")) {
+                    collections[collectionLabel].log["Framecount"] = new Dictionary<int, object>();
+                }
                 if (!collections[collectionLabel].log.ContainsKey("SessionID")) {
                 collections[collectionLabel].log["SessionID"] = new Dictionary<int, object>();
                 }
@@ -128,6 +135,7 @@ public class LoggingManager : MonoBehaviour
             }
 
             collections[collectionLabel].log["Timestamp"][count] = GetTimeStamp();
+            collections[collectionLabel].log["Framecount"][count] = GetFrameCount();
             collections[collectionLabel].log["SessionID"][count] = sessionID;
             collections[collectionLabel].log["Email"][count] = email;
             collections[collectionLabel].log[pair.Key][count] = pair.Value;
@@ -146,6 +154,9 @@ public class LoggingManager : MonoBehaviour
                 if (!collections[collectionLabel].log.ContainsKey("Timestamp")) {
                     collections[collectionLabel].log["Timestamp"] = new Dictionary<int, object>();
                 }
+                if (!collections[collectionLabel].log.ContainsKey("Framecount")) {
+                    collections[collectionLabel].log["Framecount"] = new Dictionary<int, object>();
+                }
                 if (!collections[collectionLabel].log.ContainsKey("SessionID")) {
                 collections[collectionLabel].log["SessionID"] = new Dictionary<int, object>();
                 }
@@ -163,6 +174,7 @@ public class LoggingManager : MonoBehaviour
         }
 
         collections[collectionLabel].log["Timestamp"][count] = GetTimeStamp();
+        collections[collectionLabel].log["Framecount"][count] = GetFrameCount();
         collections[collectionLabel].log["SessionID"][count] = sessionID;
         collections[collectionLabel].log["Email"][count] = email;
         collections[collectionLabel].log[columnLabel][count] = value;
@@ -312,6 +324,10 @@ public class LoggingManager : MonoBehaviour
     private string GetTimeStamp()
     {
         return System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff");
+    }
+
+    private string GetFrameCount() {
+        return Time.frameCount == null ? "-1" : Time.frameCount.ToString();
     }
 
 }
