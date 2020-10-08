@@ -77,6 +77,12 @@ public class OpenBCIInput : MonoBehaviour
     public string motorImageryEvent;
     private int inputNumber = 0;
 
+    public enum BCIProcessingMode {
+        SingleThreshold,
+        ConsecutiveThreshold,
+    }
+    public BCIProcessingMode bciProcessingMode = BCIProcessingMode.SingleThreshold;
+
     [Serializable]
     public class OnBCIStateChanged : UnityEvent<string, string> { }
 
@@ -148,8 +154,10 @@ public class OpenBCIInput : MonoBehaviour
        inputData.type = InputType.MotorImagery;
        MotorImageryEvent newClassification = MotorImageryEvent.Rest;
        inputData.validity = InputValidity.Rejected;
-       if (confidence > classificationThreshold) {
-           newClassification = MotorImageryEvent.MotorImagery;
+       if (bciProcessingMode == BCIProcessingMode.SingleThreshold) {
+           newClassification = ProcessSingleThreshold(confidence);
+       }
+       if (newClassification == MotorImageryEvent.MotorImagery) {
            inputData.validity = InputValidity.Accepted;
        }
        if (newClassification != classification) {
@@ -163,6 +171,14 @@ public class OpenBCIInput : MonoBehaviour
         onBCIEvent.Invoke(confidence);
        }
        
+    }
+
+    private MotorImageryEvent ProcessSingleThreshold(float confidence) {
+       MotorImageryEvent newClassification = MotorImageryEvent.Rest;
+       if (confidence > classificationThreshold) {
+           newClassification = MotorImageryEvent.MotorImagery;
+       }
+       return newClassification;
     }
 
     private IEnumerator ConnectToBCI() {
