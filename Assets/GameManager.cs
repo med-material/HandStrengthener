@@ -7,15 +7,21 @@ using UnityEngine.Events;
 
 
 public struct GameData {
-    public float fabRate;
-    public float accRate;
-    public float startPolicyReview;
     public int trials;
     public float interTrialIntervalSeconds;
     public float inputWindowSeconds;
     public GameState gameState;
     public float noInputReceivedFabAlarm;
     public float fabAlarmVariability;
+}
+
+public class Mechanism {
+    public string name = "";
+    public TrialType trialType;
+    public float rate = -1f;
+    public int trialsLeft = -1;
+    public int trials = -1;
+    public UrnEntryBehavior behavior;
 }
 
 public class InputData {
@@ -39,9 +45,6 @@ public enum InputType {
 public class GameDecisionData {
     public TrialType decision;
     public float currentFabAlarm;
-    public float accRate;
-    public float fabRate;
-    public float rejRate;
 }
 
 public struct GameTimers {
@@ -75,17 +78,12 @@ public class GameManager : MonoBehaviour
     public int accTrials = 10;
     public int fabTrials = 5;
 
-    private float fabRate = -1f;
-    private float accRate = -1f;
-    private float rejRate = -1f;
-    private int rejTrialsLeft = -1;
-    private int accTrialsLeft = -1;
-    private int fabTrialsLeft = -1;
-
     private int trialsTotal = -1;
     private int currentTrial = -1;
     private TrialType trialResult = TrialType.RejInput;
     private TrialType trialGoal = TrialType.RejInput;
+
+    private Dictionary<string, Mechanism> mechanisms = new Dictionary<string, Mechanism>();
 
     [Header("FabInput Settings")]
     [Tooltip("When should the fabrication fire.")]
@@ -132,14 +130,45 @@ public class GameManager : MonoBehaviour
     {
         loggingManager = GameObject.Find("LoggingManager").GetComponent<LoggingManager>();
         urn = GetComponent<UrnModel>();
+        SetupMechanisms();
         SetupUrn();
         LogMeta();
     }
 
+    private void SetupMechanisms() {
+        mechanisms["AccInput"] = new Mechanism {
+            name = "AccInput",
+            trialType = TrialType.AccInput,
+            rate = 0f,
+            trials = accTrials,
+            trialsLeft = accTrials,
+            behavior = UrnEntryBehavior.Persist
+        };
+
+        mechanisms["FabInput"] = new Mechanism {
+            name = "FabInput",
+            trialType = TrialType.FabInput,
+            rate = 0f,
+            trials = fabTrials,
+            trialsLeft = fabTrials,
+            behavior = UrnEntryBehavior.Persist
+        };
+
+        mechanisms["RejInput"] = new Mechanism {
+            name = "RejInput",
+            trialType = TrialType.RejInput,
+            rate = 0f,
+            trials = rejTrials,
+            trialsLeft = rejTrials,
+            behavior = UrnEntryBehavior.Override
+        };
+    }
+
     private void SetupUrn() {
-        urn.AddUrnEntryType("FabInput", UrnEntryBehavior.Persist, fabTrials);
-        urn.AddUrnEntryType("AccInput", UrnEntryBehavior.Persist, accTrials);
-        urn.AddUrnEntryType("RejInput", UrnEntryBehavior.Override, rejTrials);
+        foreach (KeyValuePair<string, Mechanism> pair in mechanisms) {
+            var m = pair.Value;
+            urn.AddUrnEntryType(m.name, m.behavior, m.trials);
+        }
 
         urn.NewUrn();
 
@@ -170,18 +199,18 @@ public class GameManager : MonoBehaviour
             {"InterTrialTimer", interTrialTimer},
             {"InputWindowTimer", inputWindowTimer},
             {"GameState", System.Enum.GetName(typeof(GameState), gameState)},
-            {"CurrentAcceptRate", accRate},
-            {"CurrentFabRate", fabRate},
-            {"CurrentRejectRate", rejRate},
-            {"AccInputTrialsLeft", accTrialsLeft},
-            {"FabInputTrialsLeft", fabTrialsLeft},
-            {"RejInputTrialsLeft", rejTrialsLeft},
             {"CurrentFabAlarm", currentFabAlarm},
         };
 
+        foreach (KeyValuePair<string, Mechanism> pair in mechanisms) {
+            var m = pair.Value;
+            gameLog[m.name + "TrialsLeft"] = m.trialsLeft;
+            gameLog[m.name + "Rate"] = m.rate;
+        }
+
         if (eventLabel == "GameDecision") {
+            gameLog["TrialGoal"] = trialGoal;
             gameLog["TrialResult"] = trialResult;
-            gameLog["CurrentDesignGoal"] = trialGoal;
         } else {
             gameLog["TrialResult"] = "NA";
         }
@@ -233,9 +262,6 @@ public class GameManager : MonoBehaviour
 
     public GameData createGameData() {
             GameData gameData = new GameData();
-            gameData.fabRate = fabRate;
-            gameData.accRate = accRate;
-            //gameData.startPolicyReview = startPolicyReview;
             gameData.trials = trialsTotal;
             gameData.interTrialIntervalSeconds = interTrialIntervalSeconds;
             gameData.inputWindowSeconds = inputWindowSeconds;
@@ -269,20 +295,23 @@ public class GameManager : MonoBehaviour
 
     public void CalculateRecogRate() {
         var entriesLeft = urn.GetEntriesLeft();
-        fabTrialsLeft = entriesLeft["FabInput"];
-        accTrialsLeft = entriesLeft["AccInput"];
-        rejTrialsLeft = entriesLeft["RejInput"];
+
+        foreach (KeyValuePair<string, Mechanism> pair in mechanisms) {
+            var m = pair.Value;
+            m.trialsLeft = entriesLeft[m.name];
+        }
         
         var entryResults = urn.GetEntryResults();
 
-        accRate = (float) entryResults["AccInput"] / (float) trialsTotal;
-        fabRate = (float) entryResults["FabInput"] / (float) trialsTotal;
-        rejRate = (float) entryResults["RejInput"] / (float) trialsTotal;
+        foreach (KeyValuePair<string, Mechanism> pair in mechanisms) {
+            var m = pair.Value;
+            m.rate = (float) entryResults[m.name] / (float) trialsTotal;
+        }
+
         currentTrial = urn.GetIndex();
     }
 
     public void OnInputReceived(InputData inputData) {
-        Debug.Log("input Data received");
         if (inputWindow == InputWindowState.Closed) {
             // ignore the input.
             return;
@@ -305,9 +334,6 @@ public class GameManager : MonoBehaviour
         CalculateRecogRate();
         // Send Decision Data
         GameDecisionData gameDecisionData = new GameDecisionData();
-        gameDecisionData.accRate = accRate;
-        gameDecisionData.fabRate = fabRate;
-        gameDecisionData.rejRate = rejRate;
         gameDecisionData.currentFabAlarm = currentFabAlarm;
         gameDecisionData.decision = trialResult;
         gameDecision.Invoke(gameDecisionData);
