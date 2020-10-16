@@ -2538,6 +2538,7 @@ GameObject:
   - component: {fileID: 1552617764}
   - component: {fileID: 1552617761}
   - component: {fileID: 1552617762}
+  - component: {fileID: 1552617763}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -2557,12 +2558,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab27ba71bd6f5fa43bf6d4ad3d916c71, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  setupType: 0
+  rejTrials: 1
+  accTrials: 2
+  fabTrials: 2
   noInputReceivedFabAlarm: 3
   fabAlarmVariability: 1.9
-  startPolicyReview: 0.4
-  trials: 20
-  gamePolicy: 1
   interTrialIntervalSeconds: 2
   inputWindowSeconds: 5
   onGameStateChanged:
@@ -2615,23 +2615,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-  onGamePolicyChanged:
-    m_PersistentCalls:
-      m_Calls: []
   onInputWindowChanged:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 346280222}
-        m_MethodName: OnInputWindowChanged
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   onGameTimeUpdate:
     m_PersistentCalls:
       m_Calls:
@@ -2656,6 +2642,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 838a35a33eda1214dae6a5ed6f1d4082, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1552617763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1552617760}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 22e003df3703bd24da2d1556bf192498, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &1552617764
@@ -3248,14 +3246,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2114846532}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 768faef92dd659246b264b7299bfa39c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   sequenceTimeLimit_ms: 2
   deadzoneTimeLimit_ms: 2
-  keyboardSequence: 0
+  keyboardSequence: 3
   onKeySequenceFinished:
     m_PersistentCalls:
       m_Calls:
@@ -3319,7 +3317,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2114846532}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d076990866d7a2046b67a6ba7a899656, type: 3}
   m_Name: 

@@ -25,10 +25,10 @@ public class SoundManager : MonoBehaviour
     }
 
     public void OnGameDecision(GameDecisionData decisionData) {
-        if (decisionData.decision == InputTypes.AcceptAllInput) {
+        if (decisionData.decision == TrialType.AccInput) {
             audioSource.PlayOneShot(correctSound,0.75f);
             soundState = SoundState.CorrectSound;
-        } else if (decisionData.decision == InputTypes.FabInput) {
+        } else if (decisionData.decision == TrialType.FabInput) {
             audioSource.PlayOneShot(correctSound,0.75f);
             soundState = SoundState.CorrectSound;
         } else {
