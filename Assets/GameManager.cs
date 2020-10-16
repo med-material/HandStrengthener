@@ -385,7 +385,8 @@ public class GameManager : MonoBehaviour
     public void MakeInputDecision(InputData inputData = null, bool windowExpired = false) {
         string entry = urn.ReadEntry();
         trialGoal = (TrialType) System.Enum.Parse(typeof(TrialType), entry);
-
+        trialResult = TrialType.RejInput;
+        
         if (inputData != null) {
             if (inputData.type == InputType.FabInput) {
                 if (trialGoal == TrialType.FabInput) {
@@ -417,7 +418,6 @@ public class GameManager : MonoBehaviour
                 // ignore the input.
             }
         } else if (windowExpired) {
-                trialResult = TrialType.RejInput;
                 CloseInputWindow();
         }
     }
