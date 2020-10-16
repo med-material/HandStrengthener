@@ -2561,6 +2561,9 @@ MonoBehaviour:
   rejTrials: 1
   accTrials: 2
   fabTrials: 2
+  assistSuccessTrials: 2
+  assistFailTrials: 2
+  explicitShamTrials: 2
   noInputReceivedFabAlarm: 3
   fabAlarmVariability: 1.9
   interTrialIntervalSeconds: 2
