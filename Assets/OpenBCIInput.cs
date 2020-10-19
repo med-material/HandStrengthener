@@ -208,7 +208,7 @@ public class OpenBCIInput : MonoBehaviour
            onInputFinished.Invoke(inputData);
            classification = newClassification;
        }
-       if (classification != 0f) { 
+       if (confidence != 0f) { 
         onBCIEvent.Invoke(confidence);
        }
        
