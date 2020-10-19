@@ -149,7 +149,7 @@ public class OpenBCIInput : MonoBehaviour
         string buffer = "(";
         if (bciProcessingMode == BCIProcessingMode.ConsecutiveThreshold) {
             foreach(float t in consecThresholdBufferVal) {
-                buffer += t.ToString("0.000") + " ";
+                buffer += t.ToString("0.000", System.Globalization.CultureInfo.InvariantCulture) + " ";
             }
             buffer += ")";
         }
