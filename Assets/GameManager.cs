@@ -224,7 +224,6 @@ public class GameManager : MonoBehaviour
 
     private void LogEvent(string eventLabel) {
         Dictionary<string, object> gameLog = new Dictionary<string, object>() {
-            {"Timestamp", System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.ffff")},
             {"Event", eventLabel},
             {"InputWindow", System.Enum.GetName(typeof(InputWindowState), inputWindow)},
             {"InputWindowOrder", inputIndex},
