@@ -182,7 +182,6 @@ public class OpenBCIInput : MonoBehaviour
         }
        confidence = ((float)ReadSocket());
        if (confidence == -1f) {
-            LogSample("NoData");
            // No Stream available.
            return;
        }
