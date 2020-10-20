@@ -327,6 +327,7 @@ public class GameManager : MonoBehaviour
         loggingManager.SaveLog("Game");
         loggingManager.SaveLog("Sample");
         loggingManager.SaveLog("Meta");
+        loggingManager.ClearAllLogs();
     }
 
     public void CalculateRecogRate() {
