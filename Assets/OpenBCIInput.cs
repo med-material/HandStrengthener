@@ -128,7 +128,7 @@ public class OpenBCIInput : MonoBehaviour
         LogMeta();
         onBCIStateChanged.Invoke(Enum.GetName(typeof(BCIState), bciState), "");
         StartCoroutine("ConnectToBCI");
-        inputNumber = 0f;
+        inputNumber = 0;
     }
 
     private void LogMeta() {
@@ -144,8 +144,8 @@ public class OpenBCIInput : MonoBehaviour
         Dictionary<string, object> gameLog = new Dictionary<string, object>() {
             {"Event", Enum.GetName(typeof(MotorImageryEvent), miEvent)},
             {"BCIConfidence", lastConfidence},
-            {"BCIState", Enum.GetName(typeof(BCIState), bciState),
-            {"InputNumber", inputNumber}},
+            {"BCIState", Enum.GetName(typeof(BCIState), bciState)},
+            {"InputNumber", inputNumber},
         };
         loggingManager.Log("Game", gameLog);
         string buffer = "(";
@@ -426,7 +426,7 @@ public class OpenBCIInput : MonoBehaviour
         bciState = BCIState.Disconnected;
         LogStateEvent();
         onBCIStateChanged.Invoke(Enum.GetName(typeof(BCIState), bciState), "");
-        inputNumber = 0f;
+        inputNumber = 0;
 	}
 	void OnApplicationQuit(){
         if (this.enabled) {
