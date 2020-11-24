@@ -148,14 +148,14 @@ public class OpenBCIInput : MonoBehaviour
             {"InputNumber", inputNumber},
         };
         loggingManager.Log("Game", gameLog);
-        string buffer = "(";
         if (bciProcessingMode == BCIProcessingMode.ConsecutiveThreshold) {
+            string buffer = "(";
             foreach(float t in consecThresholdBufferVal) {
                 buffer += t.ToString("0.000", System.Globalization.CultureInfo.InvariantCulture) + " ";
             }
             buffer += ")";
+            loggingManager.Log("Game", "BCIThresholdBuffer", buffer);
         }
-        loggingManager.Log("Game", "BCIThresholdBuffer", buffer);
     }
 
     private void LogStateEvent() {
