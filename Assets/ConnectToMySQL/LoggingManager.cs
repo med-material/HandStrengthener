@@ -55,7 +55,7 @@ public class LoggingManager : MonoBehaviour
     private string fileExtension = ".csv";
 
     private string filePath;
-    private char fieldSeperator = ',';
+    private char fieldSeperator = ';';
     private string sessionID = "";
     private string deviceID = "";
     private string filestamp;
@@ -63,12 +63,8 @@ public class LoggingManager : MonoBehaviour
     // Start is called before the first frame update
     void Awake()
     {
-        filestamp = GetTimeStamp().Replace('/', '-').Replace(":", "-");
-        if (CreateMetaCollection) {
-            GenerateUIDs();
-            Log("Meta", "SessionID", sessionID, LogMode.Overwrite);
-            Log("Meta", "DeviceID", deviceID, LogMode.Overwrite);
-        }
+        CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
+        NewFilestamp();
         if (savePath == "") {
             savePath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
         }
@@ -89,6 +85,20 @@ public class LoggingManager : MonoBehaviour
         }
     }
 
+    public void NewFilestamp() {
+        filestamp = GetTimeStamp().Replace('/', '-').Replace(":", "-");
+
+        if (CreateMetaCollection) {
+            GenerateUIDs();
+            Log("Meta", "SessionID", sessionID, LogMode.Overwrite);
+            Log("Meta", "DeviceID", deviceID, LogMode.Overwrite);
+        }
+
+        foreach(KeyValuePair<string, LogCollection> pair in collections) {
+            pair.Value.saveHeaders = true;
+        }
+    }
+
     public void SaveLog(string collectionLabel) {
         if (collections.ContainsKey(collectionLabel)) {
             if (Application.platform != RuntimePlatform.WebGLPlayer) {
@@ -98,6 +108,10 @@ public class LoggingManager : MonoBehaviour
         } else {
             Debug.LogError("No Collection Called " + collectionLabel);
         }
+    }
+
+    public void SetEmail(string newEmail) {
+        email = newEmail;
     }
 
     public void CreateLog(string collectionLabel) {
