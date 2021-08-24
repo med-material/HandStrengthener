@@ -307,6 +307,12 @@ public class GameManager : MonoBehaviour
             return gameData;
     }
 
+    void OnApplicationQuit() {
+        if(gameState != GameState.Stopped) {
+            EndGame();
+        }
+    }
+
     public void RunGame() {
         CalculateRecogRate();
         gameState = GameState.Running;
