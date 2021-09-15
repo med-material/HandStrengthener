@@ -83,6 +83,7 @@ public class BlinkDetector : MonoBehaviour
         //loggingManager.Log("BlinkLog", "TimestampEye", timestamp);
         loggingManager.Log("BlinkLog", "Event", "EyeClosing");
         loggingManager.Log("BlinkLog", "BlinkNo", blinkNo);
+        loggingManager.Log("BlinkLog", "DurationClosed_s", duration);
         loggingManager.SaveLog("BlinkLog");
         loggingManager.ClearLog("BlinkLog");
     }
