@@ -223,12 +223,13 @@ public class SimBCIInput : MonoBehaviour
                 inputData.validity = InputValidity.Accepted;
                 inputNumber++;
             }
+           Array.Clear(consecThresholdBuffer, 0, consecThresholdBuffer.Length);
            inputData.inputNumber = inputNumber;
            LogMotorImageryEvent(newClassification, confidence);
            Debug.Log("Motor Imagery!");
            onBCIMotorImagery.Invoke(newClassification);
            onInputFinished.Invoke(inputData);
-           classification = newClassification;
+           classification = MotorImageryEvent.Rest;
        }
        if (confidence != 0f) { 
         onBCIEvent.Invoke(confidence);
@@ -255,7 +256,6 @@ public class SimBCIInput : MonoBehaviour
             consecThresholdBuffer[consecThresholdIndex] = 0;
             consecThresholdBufferVal[consecThresholdIndex] = confidence;
         }
-        Debug.Log(consecThresholdBuffer.Sum());
         // if all positions in the buffer carry a 1, we have motor imagery.
         if (consecThresholdBuffer.Sum() == consecutiveBufferSize) {
             newClassification = MotorImageryEvent.MotorImagery;
