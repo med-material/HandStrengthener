@@ -3431,7 +3431,7 @@ MonoBehaviour:
   motorImageryEvent: 
   bciProcessingMode: 1
   BCIInput: {fileID: 4900000, guid: e918f6674ed5c66428976975a29e48ee, type: 3}
-  correctBCIInput: {fileID: 4900000, guid: 10bac11980adbe84b9dacd474ec5f9ac, type: 3}
+  correctBCIInput: {fileID: 4900000, guid: fbef9c40a4ea60d4587cb63c7351d22d, type: 3}
   onBCIStateChanged:
     m_PersistentCalls:
       m_Calls:

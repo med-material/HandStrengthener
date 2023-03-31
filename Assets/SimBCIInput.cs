@@ -225,6 +225,7 @@ public class SimBCIInput : MonoBehaviour
             }
            inputData.inputNumber = inputNumber;
            LogMotorImageryEvent(newClassification, confidence);
+           Debug.Log("Motor Imagery!");
            onBCIMotorImagery.Invoke(newClassification);
            onInputFinished.Invoke(inputData);
            classification = newClassification;
