@@ -74,11 +74,15 @@ public class SimBCIInput : MonoBehaviour
     public class OnBCIEvent : UnityEvent<float> { }
 
     public TextAsset BCIInput;
-    private string[] confList;
+    public TextAsset correctBCIInput;
+    private string[] correctConfArray;
+    private string[] confArray;
     private int confPosition;
+    private int correctConfPosition;
     private int maxConfPosition;
+    private int maxCorrectConfPosition;
     private float timer = 0f;
-    private float waitTime = 0.1f;
+    private float waitTime = 0.14f;
 
     private Dictionary<string, List<string>> BCILogs;
 
@@ -105,9 +109,12 @@ public class SimBCIInput : MonoBehaviour
         onBCIStateChanged.Invoke(Enum.GetName(typeof(BCIState), bciState), "");
         StartCoroutine("ConnectToBCI");
         inputNumber = 0;
-        confList = BCIInput.text.Split('\n');
-        maxConfPosition = confList.Length;
+        confArray = BCIInput.text.Split('\n');
+        maxConfPosition = confArray.Length-1;
         confPosition = UnityEngine.Random.Range(0,maxConfPosition);
+        correctConfArray = correctBCIInput.text.Split('\n');
+        maxCorrectConfPosition = correctConfArray.Length-1;
+        correctConfPosition = 0;
     }
 
     private void LogMeta() {
@@ -163,16 +170,35 @@ public class SimBCIInput : MonoBehaviour
         if (Input.GetKey(KeyCode.V) && timer > waitTime)
         {
             timer = 0f;
-            confidence = float.Parse(confList[confPosition], System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
+            confidence = float.Parse(confArray[confPosition], System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
             Debug.Log(confidence);
             if (confPosition < maxConfPosition) {
                 confPosition++;
             } else {
                 confPosition = 0;
             }
-        }
-        if (Input.GetKeyUp(KeyCode.V)) {
+        } else if (Input.GetKeyUp(KeyCode.V)) {
             confPosition = UnityEngine.Random.Range(0,maxConfPosition);
+            consecThresholdIndex = 0;
+            Array.Clear(consecThresholdBuffer, 0, consecThresholdBuffer.Length);
+            classification = MotorImageryEvent.Rest;
+        } else if (Input.GetKey(KeyCode.C) && timer > waitTime) {
+            timer = 0f;
+            confidence = float.Parse(correctConfArray[correctConfPosition], System.Globalization.CultureInfo.InvariantCulture.NumberFormat);
+            Debug.Log(correctConfArray[correctConfPosition]);
+            if (correctConfPosition < maxCorrectConfPosition) {
+                correctConfPosition++;
+            } else {
+                correctConfPosition = 0;
+            }
+        } else if (Input.GetKeyUp(KeyCode.C)) {
+            Debug.Log("Clear");
+            correctConfPosition = 0;
+            consecThresholdIndex = 0;
+            Array.Clear(consecThresholdBuffer, 0, consecThresholdBuffer.Length);
+            classification = MotorImageryEvent.Rest;
+        } else {
+            confidence = -1f;
         }
 
        if (confidence == -1f) {
@@ -183,7 +209,7 @@ public class SimBCIInput : MonoBehaviour
        // The code below is only run whenever a new value comes in from the BCI side.
        LogSample("Sample");
        InputData inputData = new InputData();
-       inputData.confidence = 1 - confidence;
+       inputData.confidence = confidence;
        inputData.type = InputType.MotorImagery;
        MotorImageryEvent newClassification = MotorImageryEvent.Rest;
        inputData.validity = InputValidity.Rejected;
@@ -228,7 +254,7 @@ public class SimBCIInput : MonoBehaviour
             consecThresholdBuffer[consecThresholdIndex] = 0;
             consecThresholdBufferVal[consecThresholdIndex] = confidence;
         }
-
+        Debug.Log(consecThresholdBuffer.Sum());
         // if all positions in the buffer carry a 1, we have motor imagery.
         if (consecThresholdBuffer.Sum() == consecutiveBufferSize) {
             newClassification = MotorImageryEvent.MotorImagery;
@@ -244,6 +270,7 @@ public class SimBCIInput : MonoBehaviour
         return newClassification;
     }
 
+
     private IEnumerator ConnectToBCI() {
         bciState = BCIState.Connecting;
         LogStateEvent();
@@ -252,6 +279,9 @@ public class SimBCIInput : MonoBehaviour
         bciState = BCIState.ReceivingHeader;
         LogStateEvent();
         onBCIStateChanged.Invoke(Enum.GetName(typeof(BCIState), bciState), "Waiting for data..Make sure that Acquisition is paired with PC.");
+        bciState = BCIState.ReceivingData;
+        LogStateEvent();
+        onBCIStateChanged.Invoke(Enum.GetName(typeof(BCIState), bciState), "");
         yield return null;
     }
 

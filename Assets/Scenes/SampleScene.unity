@@ -2558,9 +2558,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab27ba71bd6f5fa43bf6d4ad3d916c71, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rejTrials: 4
-  accTrials: 10
-  fabTrials: 6
+  rejTrials: 0
+  accTrials: 20
+  fabTrials: 0
   assistSuccessTrials: 0
   assistFailTrials: 0
   explicitShamTrials: 0
@@ -3431,6 +3431,7 @@ MonoBehaviour:
   motorImageryEvent: 
   bciProcessingMode: 1
   BCIInput: {fileID: 4900000, guid: e918f6674ed5c66428976975a29e48ee, type: 3}
+  correctBCIInput: {fileID: 4900000, guid: 10bac11980adbe84b9dacd474ec5f9ac, type: 3}
   onBCIStateChanged:
     m_PersistentCalls:
       m_Calls:
