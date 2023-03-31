@@ -3235,6 +3235,7 @@ GameObject:
   - component: {fileID: 2114846533}
   - component: {fileID: 2114846536}
   - component: {fileID: 2114846535}
+  - component: {fileID: 2114846537}
   m_Layer: 0
   m_Name: InputManager
   m_TagString: Untagged
@@ -3346,7 +3347,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2114846532}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 23747ce02148f664db6c7bc6fbd1d6fe, type: 3}
   m_Name: 
@@ -3357,6 +3358,79 @@ MonoBehaviour:
   consecutiveBufferSize: 8
   motorImageryEvent: 
   bciProcessingMode: 1
+  onBCIStateChanged:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1490905908}
+        m_MethodName: updateBCIStatus
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onBCIMotorImagery:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1490905908}
+        m_MethodName: OnMotorImageryDetected
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onInputFinished:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1552617761}
+        m_MethodName: OnInputReceived
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  onBCIEvent:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1490905908}
+        m_MethodName: OnBCIEvent
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &2114846537
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2114846532}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7be7a19d8e0e4214ea5dff376e4cd6b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  classificationThreshold: 0.7
+  consecutiveBufferSize: 8
+  motorImageryEvent: 
+  bciProcessingMode: 1
+  BCIInput: {fileID: 4900000, guid: e918f6674ed5c66428976975a29e48ee, type: 3}
   onBCIStateChanged:
     m_PersistentCalls:
       m_Calls:
