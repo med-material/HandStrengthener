@@ -24,25 +24,6 @@ public class Mechanism {
     public UrnEntryBehavior behavior;
 }
 
-public class InputData {
-    public InputValidity validity;
-    public InputType type;
-    public float confidence;
-    public int inputNumber;
-}
-
-public enum InputValidity {
-    Accepted,
-    Rejected
-}
-
-public enum InputType {
-    KeySequence,
-    MotorImagery,
-    BlinkDetection,
-    FabInput
-}
-
 public class GameDecisionData {
     public TrialType decision;
     public float currentFabAlarm;
